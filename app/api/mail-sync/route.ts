@@ -106,10 +106,16 @@ async function importMessage(
 }
 
 async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
-  const result: { mailbox: string; imported: number; error: string | null } = {
+  const result: {
+    mailbox: string;
+    imported: number;
+    error: string | null;
+    batchLimitReached: boolean;
+  } = {
     mailbox: config.address,
     imported: 0,
     error: null,
+    batchLimitReached: false,
   };
 
   const client = new ImapFlow({
@@ -174,26 +180,38 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
         return result;
       }
 
+      // Behandles i begraensede portioner og gemmes fortlobende (efter hver besked), saa et
+      // funktions-timeout (Vercel Hobby: max 60s) ikke nulstiller fremskridtet. Uden dette
+      // ville en stor eller langsom portion blive forsogt forfra hver 15. minut i det uendelige,
+      // fordi last_uid tidligere kun blev gemt EFTER hele portionen var faerdig.
+      const BATCH_LIMIT = 20;
       let maxUidSeen = Number(state.last_uid);
+      let processedInBatch = 0;
 
       for await (const message of client.fetch(
         `${fromUid}:*`,
         { envelope: true, uid: true },
         { uid: true },
       )) {
-        maxUidSeen = Math.max(maxUidSeen, message.uid);
         if (await importMessage(supabase, client, config, message)) {
           result.imported += 1;
         }
-      }
+        maxUidSeen = Math.max(maxUidSeen, message.uid);
 
-      await supabase
-        .from("mail_sync_state")
-        .update({
-          last_uid: maxUidSeen,
-          last_synced_at: new Date().toISOString(),
-        })
-        .eq("mailbox", config.address);
+        await supabase
+          .from("mail_sync_state")
+          .update({
+            last_uid: maxUidSeen,
+            last_synced_at: new Date().toISOString(),
+          })
+          .eq("mailbox", config.address);
+
+        processedInBatch += 1;
+        if (processedInBatch >= BATCH_LIMIT) {
+          result.batchLimitReached = true;
+          break;
+        }
+      }
     } finally {
       lock.release();
     }
