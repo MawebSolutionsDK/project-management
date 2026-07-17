@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Save, Trash2, Briefcase, Target, RefreshCw, LifeBuoy, Plus } from "lucide-react";
+import { Save, Trash2, Briefcase, Target, RefreshCw, LifeBuoy, Plus, Mail, Circle, CheckCircle2 } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { BackLink } from "@/components/back-link";
 import { Field } from "@/components/form-field";
@@ -23,7 +23,7 @@ export default async function KundeDetailPage({ params }: { params: { id: string
   const { data: customer } = await supabase.from("customers").select("*").eq("id", params.id).single();
   if (!customer) notFound();
 
-  const [projectsRes, leadsRes, agreementsRes, supportRes] = await Promise.all([
+  const [projectsRes, leadsRes, agreementsRes, supportRes, emailsRes] = await Promise.all([
     supabase.from("projects").select("id, name, status").eq("customer_id", params.id).order("created_at", { ascending: false }),
     supabase.from("leads").select("id, name, status").eq("customer_id", params.id).order("created_at", { ascending: false }),
     supabase
@@ -32,12 +32,19 @@ export default async function KundeDetailPage({ params }: { params: { id: string
       .eq("customer_id", params.id)
       .order("created_at", { ascending: false }),
     supabase.from("support_cases").select("id, title, status").eq("customer_id", params.id).order("created_at", { ascending: false }),
+    supabase
+      .from("emails")
+      .select("id, subject, from_name, from_address, received_at, is_read, is_actioned")
+      .eq("matched_customer_id", params.id)
+      .order("received_at", { ascending: false })
+      .limit(10),
   ]);
 
   const projects = projectsRes.data ?? [];
   const leads = leadsRes.data ?? [];
   const agreements = agreementsRes.data ?? [];
   const supportCases = supportRes.data ?? [];
+  const emails = emailsRes.data ?? [];
 
   const updateWithId = updateCustomer.bind(null, params.id);
   const deleteWithId = deleteCustomer.bind(null, params.id);
@@ -169,6 +176,41 @@ export default async function KundeDetailPage({ params }: { params: { id: string
                 </div>
               );
             })}
+
+            <div className="card p-5">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-ink/75">
+                <Mail className="h-4 w-4 text-accent" />
+                E-mails
+              </h2>
+              {emails.length === 0 ? (
+                <p className="mt-2 text-sm text-ink/40">Ingen mails knyttet til kunden endnu.</p>
+              ) : (
+                <ul className="mt-3 space-y-2">
+                  {emails.map((mail) => (
+                    <li key={mail.id} className="flex items-start justify-between gap-3 text-sm">
+                      <div className="min-w-0">
+                        <p className="truncate text-ink/80">{mail.subject || "(intet emne)"}</p>
+                        <p className="truncate text-xs text-ink/45">
+                          {mail.from_name || mail.from_address || "Ukendt afsender"}
+                          {mail.received_at ? ` · ${new Date(mail.received_at).toLocaleDateString("da-DK")}` : ""}
+                        </p>
+                      </div>
+                      <span title={mail.is_actioned ? "Handlet" : mail.is_read ? "Læst" : "Ulæst"} className="mt-0.5 shrink-0">
+                        {mail.is_actioned ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-accent" />
+                        ) : (
+                          <Circle className="h-3.5 w-3.5 text-ink/30" />
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Link href="/mails?filter=all" className="link-muted mt-3 inline-flex items-center gap-1">
+                <Mail className="h-3.5 w-3.5" />
+                Se alle mails
+              </Link>
+            </div>
           </div>
         </div>
       </main>
