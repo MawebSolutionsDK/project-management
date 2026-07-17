@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus, Users } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
@@ -11,14 +12,18 @@ export default async function KunderPage() {
   return (
     <>
       <AppNav current="/kunder" />
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-ink">Kunder</h1>
+            <h1 className="flex items-center gap-2 text-2xl font-semibold text-ink">
+              <Users className="h-6 w-6 text-accent" />
+              Kunder
+            </h1>
             <p className="mt-1 text-sm text-ink/55">Alle kunder, inkl. interne projekter.</p>
           </div>
-          <Link href="/kunder/ny" className="btn-primary">
-            + Ny kunde
+          <Link href="/kunder/ny" className="btn-primary gap-1.5">
+            <Plus className="h-4 w-4" />
+            Ny kunde
           </Link>
         </div>
         <div className="card overflow-hidden">

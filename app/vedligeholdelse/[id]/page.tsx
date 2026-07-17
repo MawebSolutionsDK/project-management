@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { Save, Trash2 } from "lucide-react";
 import AppNav from "@/components/app-nav";
+import { BackLink } from "@/components/back-link";
 import { Field } from "@/components/form-field";
 import { createClient } from "@/lib/supabase/server";
 import { updateAgreement, deleteAgreement } from "../actions";
@@ -21,7 +23,8 @@ export default async function AftaleDetailPage({ params }: { params: { id: strin
   return (
     <>
       <AppNav current="/vedligeholdelse" />
-      <main className="mx-auto max-w-2xl px-6 py-10">
+      <main className="mx-auto max-w-3xl px-6 py-10">
+        <BackLink href="/vedligeholdelse" label="Tilbage til aftaler" />
         <h1 className="mb-1 text-2xl font-semibold text-ink">{agreement.plan_name}</h1>
         <p className="mb-6 text-sm text-ink/55">Fornyes: {agreement.renewal_date} (beregnes automatisk ud fra startdato + periode)</p>
         <form action={updateWithId} className="card space-y-4 p-6">
@@ -36,41 +39,47 @@ export default async function AftaleDetailPage({ params }: { params: { id: strin
             </select>
           </div>
           <Field label="Plan" name="plan_name" defaultValue={agreement.plan_name} required />
-          <Field
-            label="Pris pr. måned (DKK)"
-            name="monthly_price"
-            type="number"
-            defaultValue={agreement.monthly_price?.toString() ?? ""}
-            required
-          />
-          <div>
-            <label className="label">Aftaleperiode</label>
-            <select name="period_years" defaultValue={agreement.period_years?.toString()} className="input">
-              <option value="1">1 år</option>
-              <option value="2">2 år</option>
-              <option value="3">3 år</option>
-            </select>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="Pris pr. måned (DKK)"
+              name="monthly_price"
+              type="number"
+              defaultValue={agreement.monthly_price?.toString() ?? ""}
+              required
+            />
+            <div>
+              <label className="label">Aftaleperiode</label>
+              <select name="period_years" defaultValue={agreement.period_years?.toString()} className="input">
+                <option value="1">1 år</option>
+                <option value="2">2 år</option>
+                <option value="3">3 år</option>
+              </select>
+            </div>
           </div>
-          <Field label="Startdato" name="start_date" type="date" defaultValue={agreement.start_date} required />
-          <div>
-            <label className="label">Status</label>
-            <select name="status" defaultValue={agreement.status} className="input">
-              <option value="aktiv">Aktiv</option>
-              <option value="opsagt">Opsagt</option>
-              <option value="udloebet">Udløbet</option>
-            </select>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Startdato" name="start_date" type="date" defaultValue={agreement.start_date} required />
+            <div>
+              <label className="label">Status</label>
+              <select name="status" defaultValue={agreement.status} className="input">
+                <option value="aktiv">Aktiv</option>
+                <option value="opsagt">Opsagt</option>
+                <option value="udloebet">Udløbet</option>
+              </select>
+            </div>
           </div>
           <div>
             <label className="label">Noter</label>
             <textarea name="notes" rows={3} defaultValue={agreement.notes ?? ""} className="input" />
           </div>
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="btn-primary gap-1.5">
+            <Save className="h-4 w-4" />
             Gem ændringer
           </button>
         </form>
 
         <form action={deleteWithId} className="mt-3">
-          <button type="submit" className="link-danger">
+          <button type="submit" className="link-danger inline-flex items-center gap-1.5">
+            <Trash2 className="h-3.5 w-3.5" />
             Slet aftale
           </button>
         </form>

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { Save, Trash2 } from "lucide-react";
 import AppNav from "@/components/app-nav";
+import { BackLink } from "@/components/back-link";
 import { Field } from "@/components/form-field";
 import { createClient } from "@/lib/supabase/server";
 import { updateSupportCase, deleteSupportCase } from "../actions";
@@ -17,7 +19,8 @@ export default async function SupportsagDetailPage({ params }: { params: { id: s
   return (
     <>
       <AppNav current="/support" />
-      <main className="mx-auto max-w-2xl px-6 py-10">
+      <main className="mx-auto max-w-3xl px-6 py-10">
+        <BackLink href="/support" label="Tilbage til support" />
         <h1 className="mb-6 text-2xl font-semibold text-ink">{supportCase.title}</h1>
         <form action={updateWithId} className="card space-y-4 p-6">
           <div>
@@ -35,40 +38,46 @@ export default async function SupportsagDetailPage({ params }: { params: { id: s
             <label className="label">Beskrivelse</label>
             <textarea name="description" rows={3} defaultValue={supportCase.description ?? ""} className="input" />
           </div>
-          <Field
-            label="Timeforbrug"
-            name="hours_spent"
-            type="number"
-            defaultValue={supportCase.hours_spent?.toString() ?? ""}
-          />
-          <div>
-            <label className="label">Fakturastatus</label>
-            <select name="invoice_status" defaultValue={supportCase.invoice_status} className="input">
-              <option value="ikke_faktureret">Ikke faktureret</option>
-              <option value="faktureret">Faktureret</option>
-              <option value="betalt">Betalt</option>
-            </select>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="Timeforbrug"
+              name="hours_spent"
+              type="number"
+              defaultValue={supportCase.hours_spent?.toString() ?? ""}
+            />
+            <div>
+              <label className="label">Fakturastatus</label>
+              <select name="invoice_status" defaultValue={supportCase.invoice_status} className="input">
+                <option value="ikke_faktureret">Ikke faktureret</option>
+                <option value="faktureret">Faktureret</option>
+                <option value="betalt">Betalt</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label className="label">Status</label>
-            <select name="status" defaultValue={supportCase.status} className="input">
-              <option value="aaben">Åben</option>
-              <option value="loest">Løst</option>
-            </select>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label">Status</label>
+              <select name="status" defaultValue={supportCase.status} className="input">
+                <option value="aaben">Åben</option>
+                <option value="loest">Løst</option>
+              </select>
+            </div>
+            <Field label="Åbnet dato" name="opened_at" type="date" defaultValue={supportCase.opened_at ?? ""} />
           </div>
-          <Field label="Åbnet dato" name="opened_at" type="date" defaultValue={supportCase.opened_at ?? ""} />
           <Field label="Lukket dato" name="closed_at" type="date" defaultValue={supportCase.closed_at ?? ""} />
           <div>
             <label className="label">Noter</label>
             <textarea name="notes" rows={3} defaultValue={supportCase.notes ?? ""} className="input" />
           </div>
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="btn-primary gap-1.5">
+            <Save className="h-4 w-4" />
             Gem ændringer
           </button>
         </form>
 
         <form action={deleteWithId} className="mt-3">
-          <button type="submit" className="link-danger">
+          <button type="submit" className="link-danger inline-flex items-center gap-1.5">
+            <Trash2 className="h-3.5 w-3.5" />
             Slet sag
           </button>
         </form>

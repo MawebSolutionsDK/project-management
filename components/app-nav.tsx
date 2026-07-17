@@ -1,14 +1,15 @@
 import Link from "next/link";
+import { LayoutDashboard, Users, Target, Briefcase, RefreshCw, LifeBuoy, Receipt } from "lucide-react";
 import SignOutButton from "./sign-out-button";
 
 const links = [
-  { href: "/dashboard", label: "Oversigt" },
-  { href: "/kunder", label: "Kunder" },
-  { href: "/leads", label: "Leads" },
-  { href: "/projekter", label: "Projekter" },
-  { href: "/vedligeholdelse", label: "Aftaler" },
-  { href: "/support", label: "Support" },
-  { href: "/udgifter", label: "Udgifter" },
+  { href: "/dashboard", label: "Oversigt", icon: LayoutDashboard },
+  { href: "/kunder", label: "Kunder", icon: Users },
+  { href: "/leads", label: "Leads", icon: Target },
+  { href: "/projekter", label: "Projekter", icon: Briefcase },
+  { href: "/vedligeholdelse", label: "Aftaler", icon: RefreshCw },
+  { href: "/support", label: "Support", icon: LifeBuoy },
+  { href: "/udgifter", label: "Udgifter", icon: Receipt },
 ];
 
 export default function AppNav({ current }: { current: string }) {
@@ -23,16 +24,18 @@ export default function AppNav({ current }: { current: string }) {
           <nav className="flex flex-wrap gap-1">
             {links.map((l) => {
               const active = l.href === current;
+              const Icon = l.icon;
               return (
                 <Link
                   key={l.href}
                   href={l.href}
                   className={
                     active
-                      ? "rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-canvas"
-                      : "rounded-full px-3 py-1.5 text-sm font-medium text-ink/55 transition hover:bg-ink/[0.06] hover:text-ink"
+                      ? "inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-canvas"
+                      : "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-ink/55 transition hover:bg-ink/[0.06] hover:text-ink"
                   }
                 >
+                  <Icon className="h-3.5 w-3.5" />
                   {l.label}
                 </Link>
               );

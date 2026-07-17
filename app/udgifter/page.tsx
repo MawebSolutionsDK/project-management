@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus, Receipt } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,16 +14,20 @@ export default async function UdgifterPage() {
   return (
     <>
       <AppNav current="/udgifter" />
-      <main className="mx-auto max-w-4xl px-6 py-10">
+      <main className="mx-auto max-w-5xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-ink">Software- og plugin-udgifter</h1>
+            <h1 className="flex items-center gap-2 text-2xl font-semibold text-ink">
+              <Receipt className="h-6 w-6 text-accent" />
+              Software- og plugin-udgifter
+            </h1>
             <p className="mt-1 text-sm text-ink/55">
               Samlet: {total.toLocaleString("da-DK")} kr./år — brug dette til at prissætte vedligeholdelsesaftaler korrekt.
             </p>
           </div>
-          <Link href="/udgifter/ny" className="btn-primary">
-            + Ny udgift
+          <Link href="/udgifter/ny" className="btn-primary gap-1.5">
+            <Plus className="h-4 w-4" />
+            Ny udgift
           </Link>
         </div>
         <div className="card overflow-hidden">
