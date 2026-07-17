@@ -16,6 +16,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Bell,
+  Search,
 } from "lucide-react";
 import SignOutButton from "./sign-out-button";
 
@@ -83,6 +84,30 @@ export function Sidebar({
             <ChevronsRight className="h-4 w-4" />
           ) : (
             <ChevronsLeft className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+
+      <div className="border-b border-line px-3 py-3">
+        <button
+          onClick={() =>
+            window.dispatchEvent(new CustomEvent("open-command-palette"))
+          }
+          className={
+            collapsed
+              ? "flex w-full items-center justify-center rounded-lg p-2 text-ink/45 transition hover:bg-ink/[0.06] hover:text-ink"
+              : "flex w-full items-center gap-2 rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-sm text-ink/45 transition hover:border-ink/25 hover:text-ink"
+          }
+          title="Søg (Ctrl/Cmd+K)"
+        >
+          <Search className="h-3.5 w-3.5 shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">Søg...</span>
+              <kbd className="rounded border border-line px-1 text-[10px] text-ink/35">
+                ⌘K
+              </kbd>
+            </>
           )}
         </button>
       </div>

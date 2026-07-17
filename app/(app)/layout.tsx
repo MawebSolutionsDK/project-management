@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
+import { CommandPalette } from "@/components/command-palette";
 import { createClient } from "@/lib/supabase/server";
 import { buildActiveNotifications } from "@/lib/notifications";
 
@@ -25,6 +26,7 @@ export default async function AppLayout({
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
         {children}
       </main>
+      <CommandPalette />
     </div>
   );
 }
