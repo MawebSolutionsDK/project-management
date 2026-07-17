@@ -127,6 +127,7 @@ async function syncMailbox(supabase: ReturnType<typeof createServiceClient>, con
       lock.release();
     }
   } catch (err) {
+    console.error(`[mail-sync] ${config.address} failed:`, err);
     try {
       const plain: Record<string, unknown> = {};
       for (const key of Object.getOwnPropertyNames(err as object)) {
