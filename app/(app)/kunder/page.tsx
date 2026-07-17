@@ -45,7 +45,7 @@ export default async function KunderPage() {
 
       <div className="card overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
+          <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/60">
             <tr>
               <th className="px-5 py-3">Navn</th>
               <th className="px-5 py-3">Branche</th>
@@ -106,7 +106,7 @@ export default async function KunderPage() {
             ))}
             {(customers ?? []).length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
+                <td colSpan={5} className="px-5 py-8 text-center text-ink/55">
                   Ingen kunder endnu.
                 </td>
               </tr>

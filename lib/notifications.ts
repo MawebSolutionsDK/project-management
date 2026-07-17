@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { daysUntil } from "@/lib/dates";
 
 export type NotificationTone = "danger" | "warning" | "info";
@@ -15,8 +16,24 @@ export type Notification = {
 // en stabil nøgle der inkluderer selve datoen (fx "lead:<id>:2026-08-01"), så en "markér
 // som set" kun dækker den konkrete dato: ændres datoen senere (fx udskudt opfølgning),
 // dukker en ny notifikation med en anden nøgle naturligt op igen uden ekstra bogføring.
+type DismissedRow = { key: string };
+type LeadRow = {
+  id: string;
+  name: string;
+  next_action: string | null;
+  next_action_date: string;
+};
+type ProjectRow = { id: string; name: string; deadline: string };
+type AgreementRow = {
+  id: string;
+  plan_name: string;
+  renewal_date: string;
+  customer: { name: string } | null;
+};
+type ExpenseRow = { id: string; name: string; renewal_date: string };
+
 export async function buildActiveNotifications(
-  supabase: any,
+  supabase: SupabaseClient,
 ): Promise<Notification[]> {
   const [dismissedRes, leadsRes, projectsRes, agreementsRes, expensesRes] =
     await Promise.all([
@@ -42,11 +59,11 @@ export async function buildActiveNotifications(
     ]);
 
   const dismissedKeys = new Set(
-    (dismissedRes.data ?? []).map((d: any) => d.key),
+    ((dismissedRes.data ?? []) as DismissedRow[]).map((d) => d.key),
   );
   const notifications: Notification[] = [];
 
-  for (const lead of leadsRes.data ?? []) {
+  for (const lead of (leadsRes.data ?? []) as LeadRow[]) {
     if (!lead.next_action_date) continue;
     const d = daysUntil(lead.next_action_date);
     const key = `lead:${lead.id}:${lead.next_action_date}`;
@@ -69,7 +86,7 @@ export async function buildActiveNotifications(
     }
   }
 
-  for (const project of projectsRes.data ?? []) {
+  for (const project of (projectsRes.data ?? []) as ProjectRow[]) {
     if (!project.deadline) continue;
     const d = daysUntil(project.deadline);
     const key = `project:${project.id}:${project.deadline}`;
@@ -92,7 +109,8 @@ export async function buildActiveNotifications(
     }
   }
 
-  for (const agreement of (agreementsRes.data ?? []) as any[]) {
+  for (const agreement of (agreementsRes.data ??
+    []) as unknown as AgreementRow[]) {
     if (!agreement.renewal_date) continue;
     const d = daysUntil(agreement.renewal_date);
     const key = `agreement:${agreement.id}:${agreement.renewal_date}`;
@@ -115,7 +133,7 @@ export async function buildActiveNotifications(
     }
   }
 
-  for (const expense of expensesRes.data ?? []) {
+  for (const expense of (expensesRes.data ?? []) as ExpenseRow[]) {
     if (!expense.renewal_date) continue;
     const d = daysUntil(expense.renewal_date);
     const key = `expense:${expense.id}:${expense.renewal_date}`;

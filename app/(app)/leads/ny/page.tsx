@@ -36,7 +36,7 @@ export default async function NytLeadPage({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-ink/45">
+            <p className="mt-1 text-xs text-ink/60">
               Brug denne hvis leadet er en ny mulighed hos en eksisterende kunde
               (fx et nyt produkt).
             </p>

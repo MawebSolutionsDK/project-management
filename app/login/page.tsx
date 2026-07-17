@@ -40,7 +40,7 @@ export default function LoginPage() {
         className="card w-full max-w-sm space-y-5 p-8"
       >
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink/40">
+          <p className="text-xs font-medium uppercase tracking-wide text-ink/55">
             Maweb Solutions
           </p>
           <h1 className="text-xl font-semibold text-ink">

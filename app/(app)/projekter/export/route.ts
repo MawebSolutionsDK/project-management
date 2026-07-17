@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import type { Project } from "@/lib/types";
+
+type ProjectRow = Project & { customer: { name: string } | null };
 
 function csvEscape(value: unknown): string {
   const str = value === null || value === undefined ? "" : String(value);
@@ -31,7 +34,7 @@ export async function GET() {
   ];
   const lines = [headers.join(",")];
 
-  for (const p of rows as any[]) {
+  for (const p of rows as ProjectRow[]) {
     lines.push(
       [
         csvEscape(p.name),

@@ -190,6 +190,23 @@ export const supportStatusTones: Record<SupportStatus, BadgeTone> = {
   loest: "success",
 };
 
+export interface Email {
+  id: string;
+  mailbox: string;
+  message_id: string;
+  imap_uid: number | null;
+  from_address: string | null;
+  from_name: string | null;
+  subject: string | null;
+  received_at: string | null;
+  preview: string | null;
+  matched_customer_id: string | null;
+  matched_lead_id: string | null;
+  is_read: boolean;
+  is_actioned: boolean;
+  created_at: string;
+}
+
 export type PricingType = "engangsbeloeb" | "maanedlig";
 
 export interface Product {

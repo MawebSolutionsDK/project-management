@@ -1,10 +1,14 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 export type ChartPoint = { label: string; value: number };
 
 // MRR-tilvækst ud fra hvornår aktive aftaler startede (kumuleret sum af monthly_price pr.
 // måned, ordnet efter start_date). Dette er IKKE en fuld historisk MRR-graf med churn
 // (vi tracker ikke opsigelsesdato), men en ærlig graf over hvor meget nuværende aktiv MRR
 // stammer fra hvornår - stiger kun, falder aldrig, og det er bevidst tydeliggjort i UI-teksten.
-export async function buildMrrGrowth(supabase: any): Promise<ChartPoint[]> {
+export async function buildMrrGrowth(
+  supabase: SupabaseClient,
+): Promise<ChartPoint[]> {
   const { data } = await supabase
     .from("maintenance_agreements")
     .select("monthly_price, start_date")
@@ -52,7 +56,7 @@ export async function buildMrrGrowth(supabase: any): Promise<ChartPoint[]> {
 
 // Nye leads pr. uge, seneste N uger (default 8) - talt direkte fra leads.created_at.
 export async function buildNewLeadsPerWeek(
-  supabase: any,
+  supabase: SupabaseClient,
   weeks = 8,
 ): Promise<ChartPoint[]> {
   const now = new Date();

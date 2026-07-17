@@ -102,13 +102,13 @@ export function Sidebar({
             {!collapsed && (
               <span className="truncate text-sm font-semibold tracking-tight text-ink">
                 Maweb Solutions
-                <span className="ml-1.5 font-normal text-ink/40">· system</span>
+                <span className="ml-1.5 font-normal text-ink/55">· system</span>
               </span>
             )}
           </div>
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="hidden shrink-0 rounded-md p-1 text-ink/45 transition hover:bg-ink/[0.06] hover:text-ink md:block"
+            className="hidden shrink-0 rounded-md p-1 text-ink/60 transition hover:bg-ink/[0.06] hover:text-ink md:block"
             title={collapsed ? "Fold sidebar ud" : "Fold sidebar sammen"}
           >
             {collapsed ? (
@@ -119,8 +119,9 @@ export function Sidebar({
           </button>
           <button
             onClick={() => setMobileOpen(false)}
-            className="shrink-0 rounded-md p-1 text-ink/45 transition hover:bg-ink/[0.06] hover:text-ink md:hidden"
+            className="shrink-0 rounded-md p-1 text-ink/60 transition hover:bg-ink/[0.06] hover:text-ink md:hidden"
             title="Luk menu"
+            aria-label="Luk menu"
           >
             <X className="h-4 w-4" />
           </button>
@@ -133,16 +134,17 @@ export function Sidebar({
             }
             className={
               collapsed
-                ? "flex w-full items-center justify-center rounded-lg p-2 text-ink/45 transition hover:bg-ink/[0.06] hover:text-ink"
-                : "flex w-full items-center gap-2 rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-sm text-ink/45 transition hover:border-ink/25 hover:text-ink"
+                ? "flex w-full items-center justify-center rounded-lg p-2 text-ink/60 transition hover:bg-ink/[0.06] hover:text-ink"
+                : "flex w-full items-center gap-2 rounded-lg border border-line bg-canvas px-2.5 py-1.5 text-sm text-ink/60 transition hover:border-ink/25 hover:text-ink"
             }
             title="Søg (Ctrl/Cmd+K)"
+            aria-label="Søg (Ctrl/Cmd+K)"
           >
             <Search className="h-3.5 w-3.5 shrink-0" />
             {!collapsed && (
               <>
                 <span className="flex-1 text-left">Søg...</span>
-                <kbd className="rounded border border-line px-1 text-[10px] text-ink/35">
+                <kbd className="rounded border border-line px-1 text-[10px] text-ink/55">
                   ⌘K
                 </kbd>
               </>
@@ -154,7 +156,7 @@ export function Sidebar({
           {groups.map((group, i) => (
             <div key={group.title ?? `group-${i}`}>
               {group.title && !collapsed && (
-                <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink/35">
+                <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink/55">
                   {group.title}
                 </p>
               )}
@@ -210,7 +212,7 @@ export function Sidebar({
 
         <div className="border-t border-line px-3 py-4">
           {!collapsed && (
-            <p className="mb-2 px-2.5 text-xs text-ink/40">Konto</p>
+            <p className="mb-2 px-2.5 text-xs text-ink/55">Konto</p>
           )}
           <div className={collapsed ? "flex justify-center" : "px-2.5"}>
             <SignOutButton />

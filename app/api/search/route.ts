@@ -66,9 +66,10 @@ export async function GET(request: Request) {
         .ilike(target.column, `%${q}%`)
         .limit(5);
 
-      return (data ?? []).map((row: any) => ({
-        id: row.id as string,
-        label: row[target.column] as string,
+      type SearchRow = { id: string; [key: string]: unknown };
+      return ((data ?? []) as SearchRow[]).map((row) => ({
+        id: row.id,
+        label: String(row[target.column] ?? ""),
         group: target.label,
         href: `${target.hrefPrefix}/${row.id}`,
       }));

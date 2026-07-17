@@ -237,7 +237,7 @@ export default async function KundeDetailPage({
                   {section.title}
                 </h2>
                 {section.items.length === 0 ? (
-                  <p className="mt-2 text-sm text-ink/40">Ingen endnu.</p>
+                  <p className="mt-2 text-sm text-ink/55">Ingen endnu.</p>
                 ) : (
                   <ul className="mt-3 space-y-2">
                     {section.items.map((item) => (
@@ -281,7 +281,7 @@ export default async function KundeDetailPage({
               E-mails
             </h2>
             {emails.length === 0 ? (
-              <p className="mt-2 text-sm text-ink/40">
+              <p className="mt-2 text-sm text-ink/55">
                 Ingen mails knyttet til kunden endnu.
               </p>
             ) : (
@@ -295,7 +295,7 @@ export default async function KundeDetailPage({
                       <p className="truncate text-ink/80">
                         {mail.subject || "(intet emne)"}
                       </p>
-                      <p className="truncate text-xs text-ink/45">
+                      <p className="truncate text-xs text-ink/60">
                         {mail.from_name ||
                           mail.from_address ||
                           "Ukendt afsender"}

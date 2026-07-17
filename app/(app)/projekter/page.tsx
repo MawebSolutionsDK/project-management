@@ -11,7 +11,13 @@ import {
   type KanbanColumnDef,
 } from "@/components/kanban-board";
 import { createClient } from "@/lib/supabase/server";
-import { projectStatusLabels, projectStatusTones } from "@/lib/types";
+import {
+  projectStatusLabels,
+  projectStatusTones,
+  type Project,
+} from "@/lib/types";
+
+type ProjectRow = Project & { customer: { name: string } | null };
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
 import { deleteProject, updateProjectStatus } from "./actions";
 
@@ -38,7 +44,7 @@ export default async function ProjekterPage({
   const isOpenStatus = (status: string) =>
     !["afsluttet", "efter_service"].includes(status);
 
-  const cards: KanbanCard[] = (projects ?? []).map((p: any) => {
+  const cards: KanbanCard[] = ((projects ?? []) as ProjectRow[]).map((p) => {
     const overdue =
       isOpenStatus(p.status) && p.deadline && daysUntil(p.deadline) < 0;
     let meta: string | null = null;
@@ -100,7 +106,7 @@ export default async function ProjekterPage({
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
+            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/60">
               <tr>
                 <th className="px-5 py-3">Projekt</th>
                 <th className="px-5 py-3">Kunde</th>
@@ -110,7 +116,7 @@ export default async function ProjekterPage({
               </tr>
             </thead>
             <tbody>
-              {(projects ?? []).map((p: any) => (
+              {((projects ?? []) as ProjectRow[]).map((p) => (
                 <tr
                   key={p.id}
                   data-search-row={`${p.name} ${p.customer?.name ?? ""}`}
@@ -154,7 +160,7 @@ export default async function ProjekterPage({
               ))}
               {(projects ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
+                  <td colSpan={5} className="px-5 py-8 text-center text-ink/55">
                     Ingen projekter endnu.
                   </td>
                 </tr>

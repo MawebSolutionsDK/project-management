@@ -13,7 +13,7 @@
     @apply rounded-xl border border-line bg-surface shadow-[0_1px_0_rgba(255,255,255,0.03),0_8px_24px_rgba(0,0,0,0.35)];
   }
   .input {
-    @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink/35 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
+    @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink/55 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
   }
   .label {
     @apply mb-1 block text-sm font-medium text-ink/75;

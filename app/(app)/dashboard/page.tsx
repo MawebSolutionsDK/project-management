@@ -18,6 +18,14 @@ import {
 } from "@/components/dashboard-charts";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
+
+type ActiveAgreementRow = {
+  id: string;
+  monthly_price: number;
+  renewal_date: string;
+  plan_name: string;
+  customer: { name: string } | null;
+};
 import { buildPeriodSummaries, type PeriodStats } from "@/lib/summary";
 import { buildActiveNotifications } from "@/lib/notifications";
 import { buildActivityLog } from "@/lib/activity";
@@ -80,9 +88,10 @@ export default async function DashboardPage() {
     buildNewLeadsPerWeek(supabase),
   ]);
 
-  const activeAgreements = activeAgreementsRes.data ?? [];
+  const activeAgreements = (activeAgreementsRes.data ??
+    []) as unknown as ActiveAgreementRow[];
   const mrr = activeAgreements.reduce(
-    (sum, a: any) => sum + Number(a.monthly_price || 0),
+    (sum, a) => sum + Number(a.monthly_price || 0),
     0,
   );
 
@@ -189,7 +198,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/55">
         Nøgletal
       </h2>
       <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -223,13 +232,13 @@ export default async function DashboardPage() {
         })}
       </div>
 
-      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/55">
         Grafer
       </h2>
       <div className="mt-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card p-5">
           <h2 className="text-sm font-semibold text-ink/75">MRR-tilvækst</h2>
-          <p className="mt-0.5 text-xs text-ink/40">
+          <p className="mt-0.5 text-xs text-ink/55">
             Kumuleret pris for aktive aftaler, efter deres startdato. Viser ikke
             opsigelser.
           </p>
@@ -241,14 +250,14 @@ export default async function DashboardPage() {
           <h2 className="text-sm font-semibold text-ink/75">
             Nye leads pr. uge
           </h2>
-          <p className="mt-0.5 text-xs text-ink/40">Seneste 8 uger.</p>
+          <p className="mt-0.5 text-xs text-ink/55">Seneste 8 uger.</p>
           <div className="mt-3">
             <LeadsPerWeekChart data={leadsPerWeekData} />
           </div>
         </div>
       </div>
 
-      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/55">
         Periode-oversigt
       </h2>
       <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -289,7 +298,7 @@ export default async function DashboardPage() {
         })}
       </div>
 
-      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/55">
         Kræver din opmærksomhed
       </h2>
       <div className="mt-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -300,13 +309,13 @@ export default async function DashboardPage() {
               Notifikationer
             </h2>
             {notifications.length > 0 && (
-              <span className="text-xs text-ink/40">
+              <span className="text-xs text-ink/55">
                 {notifications.length} i alt
               </span>
             )}
           </div>
           {topNotifications.length === 0 ? (
-            <p className="mt-2 text-sm text-ink/40">
+            <p className="mt-2 text-sm text-ink/55">
               Intet der kræver din opmærksomhed lige nu.
             </p>
           ) : (
@@ -340,7 +349,7 @@ export default async function DashboardPage() {
             Seneste aktivitet
           </h2>
           {activity.length === 0 ? (
-            <p className="mt-2 text-sm text-ink/40">Ingen aktivitet endnu.</p>
+            <p className="mt-2 text-sm text-ink/55">Ingen aktivitet endnu.</p>
           ) : (
             <ul className="mt-3 space-y-2.5">
               {activity.map((a) => (

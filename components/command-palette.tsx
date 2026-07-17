@@ -102,16 +102,16 @@ export function CommandPalette() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
-          <Search className="h-4 w-4 shrink-0 text-ink/40" />
+          <Search className="h-4 w-4 shrink-0 text-ink/55" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDownInput}
             placeholder="Søg efter kunde, lead, projekt, sag..."
-            className="w-full bg-transparent text-sm text-ink placeholder:text-ink/35 focus:outline-none"
+            className="w-full bg-transparent text-sm text-ink placeholder:text-ink/55 focus:outline-none"
           />
-          <kbd className="shrink-0 rounded border border-line px-1.5 py-0.5 text-[10px] text-ink/35">
+          <kbd className="shrink-0 rounded border border-line px-1.5 py-0.5 text-[10px] text-ink/55">
             Esc
           </kbd>
         </div>
@@ -129,7 +129,7 @@ export function CommandPalette() {
                   }`}
                 >
                   <span className="truncate">{r.label}</span>
-                  <span className="shrink-0 text-xs text-ink/35">
+                  <span className="shrink-0 text-xs text-ink/55">
                     {r.group}
                   </span>
                 </button>
@@ -138,12 +138,12 @@ export function CommandPalette() {
           </ul>
         )}
         {query.trim().length >= 2 && results.length === 0 && (
-          <p className="px-4 py-6 text-center text-sm text-ink/40">
+          <p className="px-4 py-6 text-center text-sm text-ink/55">
             Ingen resultater.
           </p>
         )}
         {query.trim().length < 2 && (
-          <p className="px-4 py-6 text-center text-xs text-ink/35">
+          <p className="px-4 py-6 text-center text-xs text-ink/55">
             Skriv mindst 2 tegn for at søge.
           </p>
         )}

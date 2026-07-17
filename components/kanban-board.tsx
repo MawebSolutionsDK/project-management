@@ -93,7 +93,7 @@ export function KanbanBoard({
                 <span className="text-sm font-semibold text-ink/80">
                   {col.label}
                 </span>
-                <span className="rounded-full bg-ink/[0.06] px-1.5 py-0.5 text-xs text-ink/45">
+                <span className="rounded-full bg-ink/[0.06] px-1.5 py-0.5 text-xs text-ink/60">
                   {colCards.length}
                 </span>
               </div>
@@ -142,7 +142,7 @@ export function KanbanBoard({
                                     ? "font-medium text-rust"
                                     : card.metaTone === "warning"
                                       ? "text-gold"
-                                      : "text-ink/40"
+                                      : "text-ink/55"
                                 }`}
                               >
                                 {card.meta}

@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 export type ActivityEvent = {
   key: string;
   label: string;
@@ -13,11 +15,42 @@ export type ActivityEvent = {
   timestamp: string;
 };
 
+type CustomerRow = { id: string; name: string; created_at: string };
+type LeadRow = {
+  id: string;
+  name: string;
+  created_at: string;
+  status: string;
+  updated_at: string | null;
+};
+type ProjectRow = {
+  id: string;
+  name: string;
+  created_at: string;
+  status: string;
+  updated_at: string | null;
+};
+type SupportRow = {
+  id: string;
+  title: string;
+  created_at: string;
+  status: string;
+  closed_at: string | null;
+};
+type AgreementRow = {
+  id: string;
+  plan_name: string;
+  created_at: string;
+  customer: { name: string } | null;
+};
+type ProductRow = { id: string; name: string; created_at: string };
+type ExpenseRow = { id: string; name: string; created_at: string };
+
 // Aktivitetslog er, ligesom notifikationer, afledt af eksisterende created_at/updated_at-felter
 // på tværs af moduler - ingen ny "activity_log"-tabel. Dækker både oprettelser og et par
 // centrale afslutnings-hændelser (lead vundet, projekt afsluttet, sag løst).
 export async function buildActivityLog(
-  supabase: any,
+  supabase: SupabaseClient,
   limitPerModule = 100,
 ): Promise<ActivityEvent[]> {
   const [customers, leads, projects, support, agreements, products, expenses] =
@@ -61,7 +94,7 @@ export async function buildActivityLog(
 
   const events: ActivityEvent[] = [];
 
-  for (const c of (customers.data ?? []) as any[]) {
+  for (const c of (customers.data ?? []) as CustomerRow[]) {
     events.push({
       key: `customer-new-${c.id}`,
       label: `Ny kunde: ${c.name}`,
@@ -70,7 +103,7 @@ export async function buildActivityLog(
       timestamp: c.created_at,
     });
   }
-  for (const l of (leads.data ?? []) as any[]) {
+  for (const l of (leads.data ?? []) as LeadRow[]) {
     events.push({
       key: `lead-new-${l.id}`,
       label: `Nyt lead: ${l.name}`,
@@ -88,7 +121,7 @@ export async function buildActivityLog(
       });
     }
   }
-  for (const p of (projects.data ?? []) as any[]) {
+  for (const p of (projects.data ?? []) as ProjectRow[]) {
     events.push({
       key: `project-new-${p.id}`,
       label: `Nyt projekt: ${p.name}`,
@@ -106,7 +139,7 @@ export async function buildActivityLog(
       });
     }
   }
-  for (const s of (support.data ?? []) as any[]) {
+  for (const s of (support.data ?? []) as SupportRow[]) {
     events.push({
       key: `support-new-${s.id}`,
       label: `Ny supportsag: ${s.title}`,
@@ -124,7 +157,7 @@ export async function buildActivityLog(
       });
     }
   }
-  for (const a of (agreements.data ?? []) as any[]) {
+  for (const a of (agreements.data ?? []) as unknown as AgreementRow[]) {
     events.push({
       key: `agreement-new-${a.id}`,
       label: `Ny aftale: ${a.customer?.name ?? "–"} · ${a.plan_name}`,
@@ -133,7 +166,7 @@ export async function buildActivityLog(
       timestamp: a.created_at,
     });
   }
-  for (const p of (products.data ?? []) as any[]) {
+  for (const p of (products.data ?? []) as ProductRow[]) {
     events.push({
       key: `product-new-${p.id}`,
       label: `Nyt produkt: ${p.name}`,
@@ -142,7 +175,7 @@ export async function buildActivityLog(
       timestamp: p.created_at,
     });
   }
-  for (const e of (expenses.data ?? []) as any[]) {
+  for (const e of (expenses.data ?? []) as ExpenseRow[]) {
     events.push({
       key: `expense-new-${e.id}`,
       label: `Ny udgift: ${e.name}`,

@@ -2,6 +2,12 @@ import Link from "next/link";
 import { Mail, CheckCircle2, Circle, Wrench, Trash2 } from "lucide-react";
 import { EmailMatchSelect } from "@/components/email-match-select";
 import { createClient } from "@/lib/supabase/server";
+import type { Email } from "@/lib/types";
+
+type EmailRow = Email & {
+  customer: { name: string } | null;
+  lead: { name: string } | null;
+};
 import {
   toggleRead,
   toggleActioned,
@@ -81,7 +87,7 @@ export default async function MailsPage({
 
       <div className="card overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
+          <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/60">
             <tr>
               <th className="px-5 py-3">Afsender</th>
               <th className="px-5 py-3">Emne</th>
@@ -93,7 +99,7 @@ export default async function MailsPage({
             </tr>
           </thead>
           <tbody>
-            {(emails ?? []).map((e: any) => {
+            {((emails ?? []) as EmailRow[]).map((e) => {
               const readAction = toggleRead.bind(null, e.id, e.is_read);
               const actionedAction = toggleActioned.bind(
                 null,
@@ -131,7 +137,7 @@ export default async function MailsPage({
                   <td className="px-5 py-3 text-ink/80">
                     <div>{e.from_name || "Ukendt afsender"}</div>
                     {e.from_address && (
-                      <div className="text-xs font-normal text-ink/45">
+                      <div className="text-xs font-normal text-ink/60">
                         {e.from_address}
                       </div>
                     )}
@@ -140,7 +146,7 @@ export default async function MailsPage({
                     <div>{e.subject || "(intet emne)"}</div>
                     {e.preview && (
                       <div
-                        className="mt-0.5 max-w-xs truncate text-xs font-normal text-ink/40"
+                        className="mt-0.5 max-w-xs truncate text-xs font-normal text-ink/55"
                         title={e.preview}
                       >
                         {e.preview}
@@ -218,8 +224,9 @@ export default async function MailsPage({
                       <form action={deleteAction}>
                         <button
                           type="submit"
-                          className="text-ink/40 transition hover:text-rust"
+                          className="text-ink/55 transition hover:text-rust"
                           title="Slet mail fra systemet"
+                          aria-label="Slet mail fra systemet"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -231,7 +238,7 @@ export default async function MailsPage({
             })}
             {(emails ?? []).length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-8 text-center text-ink/40">
+                <td colSpan={7} className="px-5 py-8 text-center text-ink/55">
                   Ingen mails at vise endnu.
                 </td>
               </tr>

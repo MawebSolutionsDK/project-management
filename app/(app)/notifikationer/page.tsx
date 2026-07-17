@@ -23,7 +23,7 @@ export default async function NotifikationerPage() {
 
       <div className="card mt-6 overflow-hidden">
         {notifications.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-ink/40">
+          <p className="px-5 py-8 text-center text-sm text-ink/55">
             Intet der kræver din opmærksomhed lige nu.
           </p>
         ) : (
@@ -49,7 +49,7 @@ export default async function NotifikationerPage() {
                   <form action={dismissAction}>
                     <button
                       type="submit"
-                      className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-ink/45 transition hover:text-accent"
+                      className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-ink/60 transition hover:text-accent"
                       title="Markér som set"
                     >
                       <Check className="h-3.5 w-3.5" />

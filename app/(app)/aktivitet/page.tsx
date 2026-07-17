@@ -56,7 +56,7 @@ export default async function AktivitetPage({
 
       <div className="card overflow-hidden">
         {filtered.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-ink/40">
+          <p className="px-5 py-8 text-center text-sm text-ink/55">
             Ingen aktivitet endnu.
           </p>
         ) : (
@@ -72,7 +72,7 @@ export default async function AktivitetPage({
                 >
                   {e.label}
                 </Link>
-                <span className="shrink-0 text-xs text-ink/40">
+                <span className="shrink-0 text-xs text-ink/55">
                   {new Date(e.timestamp).toLocaleString("da-DK")}
                 </span>
               </li>

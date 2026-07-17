@@ -1,7 +1,10 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 // Delt matching-logik mellem mail-sync (service-role klient) og manuelle
 // server actions (bruger-session klient) - se app/api/mail-sync/route.ts og
-// app/mails/actions.ts. Klienttypen holdes løs med vilje, da begge klienter
-// har samme .from()/.select()/.ilike()-API men er typet forskelligt.
+// app/mails/actions.ts. Begge klienter er strukturelt kompatible med
+// SupabaseClient (samme .from()/.select()/.ilike()-API), så den fælles type
+// bruges her i stedet for `any`.
 
 // Almindelige gratis mail-udbydere - domænematch her ville give falske positiver
 // (mange forskellige kunder/leads kan sagtens dele "gmail.com" osv).
@@ -21,7 +24,7 @@ export const FREEMAIL_DOMAINS = new Set([
 ]);
 
 async function findMatchByAddress(
-  supabase: any,
+  supabase: SupabaseClient,
   table: "customers" | "leads",
   email: string,
 ) {
@@ -34,7 +37,7 @@ async function findMatchByAddress(
 }
 
 async function findMatchByDomain(
-  supabase: any,
+  supabase: SupabaseClient,
   table: "customers" | "leads",
   domain: string,
 ) {
@@ -48,7 +51,7 @@ async function findMatchByDomain(
 }
 
 export async function findMatch(
-  supabase: any,
+  supabase: SupabaseClient,
   fromAddress: string,
 ): Promise<{ matchedCustomerId: string | null; matchedLeadId: string | null }> {
   let matchedCustomerId = await findMatchByAddress(

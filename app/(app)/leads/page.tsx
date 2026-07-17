@@ -11,7 +11,9 @@ import {
   type KanbanColumnDef,
 } from "@/components/kanban-board";
 import { createClient } from "@/lib/supabase/server";
-import { leadStatusLabels, leadStatusTones } from "@/lib/types";
+import { leadStatusLabels, leadStatusTones, type Lead } from "@/lib/types";
+
+type LeadRow = Lead & { customer: { name: string } | null };
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
 import { deleteLead, updateLeadStatus } from "./actions";
 
@@ -35,7 +37,7 @@ export default async function LeadsPage({
     .select("*, customer:customers(name)")
     .order("created_at", { ascending: false });
 
-  const cards: KanbanCard[] = (leads ?? []).map((l: any) => {
+  const cards: KanbanCard[] = ((leads ?? []) as LeadRow[]).map((l) => {
     const isOpen = !["vundet", "tabt"].includes(l.status);
     const overdue =
       isOpen && l.next_action_date && daysUntil(l.next_action_date) < 0;
@@ -94,7 +96,7 @@ export default async function LeadsPage({
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
+            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/60">
               <tr>
                 <th className="px-5 py-3">Navn</th>
                 <th className="px-5 py-3">Kilde</th>
@@ -104,7 +106,7 @@ export default async function LeadsPage({
               </tr>
             </thead>
             <tbody>
-              {(leads ?? []).map((l: any) => {
+              {((leads ?? []) as LeadRow[]).map((l) => {
                 const isOpen = !["vundet", "tabt"].includes(l.status);
                 const overdue =
                   isOpen &&
@@ -172,7 +174,7 @@ export default async function LeadsPage({
               })}
               {(leads ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
+                  <td colSpan={5} className="px-5 py-8 text-center text-ink/55">
                     Ingen leads endnu.
                   </td>
                 </tr>

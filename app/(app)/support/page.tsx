@@ -16,7 +16,10 @@ import {
   supportStatusTones,
   invoiceStatusLabels,
   invoiceStatusTones,
+  type SupportCase,
 } from "@/lib/types";
+
+type SupportCaseRow = SupportCase & { customer: { name: string } | null };
 import { deleteSupportCase, updateSupportStatus } from "./actions";
 
 const SUPPORT_COLUMNS: KanbanColumnDef[] = (
@@ -35,7 +38,7 @@ export default async function SupportPage({
     .select("*, customer:customers(name)")
     .order("opened_at", { ascending: false });
 
-  const cards: KanbanCard[] = (cases ?? []).map((s: any) => ({
+  const cards: KanbanCard[] = ((cases ?? []) as SupportCaseRow[]).map((s) => ({
     id: s.id,
     title: s.title,
     subtitle: s.customer?.name ?? null,
@@ -86,7 +89,7 @@ export default async function SupportPage({
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
+            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/60">
               <tr>
                 <th className="px-5 py-3">Sag</th>
                 <th className="px-5 py-3">Kunde</th>
@@ -97,7 +100,7 @@ export default async function SupportPage({
               </tr>
             </thead>
             <tbody>
-              {(cases ?? []).map((s: any) => (
+              {((cases ?? []) as SupportCaseRow[]).map((s) => (
                 <tr
                   key={s.id}
                   data-search-row={`${s.title} ${s.customer?.name ?? ""}`}
@@ -156,7 +159,7 @@ export default async function SupportPage({
               ))}
               {(cases ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-ink/40">
+                  <td colSpan={6} className="px-5 py-8 text-center text-ink/55">
                     Ingen supportsager endnu.
                   </td>
                 </tr>

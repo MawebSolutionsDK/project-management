@@ -14,6 +14,7 @@ export function MobileTopbar() {
           }
           className="rounded-md p-1.5 text-ink/60 transition hover:bg-ink/[0.06] hover:text-ink"
           title="Menu"
+          aria-label="Åbn menu"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -28,6 +29,7 @@ export function MobileTopbar() {
         }
         className="rounded-md p-1.5 text-ink/60 transition hover:bg-ink/[0.06] hover:text-ink"
         title="Søg"
+        aria-label="Søg"
       >
         <Search className="h-5 w-5" />
       </button>

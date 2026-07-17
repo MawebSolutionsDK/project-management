@@ -19,7 +19,13 @@ const ACCENT = "#7C93FF";
 const GRID_LINE = "#262B36";
 const MUTED = "#8A90A0";
 
-function ChartTooltip({ active, payload, label }: any) {
+type ChartTooltipProps = {
+  active?: boolean;
+  payload?: { value: number | string }[];
+  label?: string;
+};
+
+function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-line bg-surface px-3 py-2 text-xs shadow-lg">
@@ -33,7 +39,7 @@ function ChartTooltip({ active, payload, label }: any) {
 
 export function MrrGrowthChart({ data }: { data: ChartPoint[] }) {
   if (data.length === 0) {
-    return <p className="text-sm text-ink/40">Ingen aktive aftaler endnu.</p>;
+    return <p className="text-sm text-ink/55">Ingen aktive aftaler endnu.</p>;
   }
   return (
     <ResponsiveContainer width="100%" height={200}>
@@ -79,7 +85,7 @@ export function LeadsPerWeekChart({ data }: { data: ChartPoint[] }) {
   const allZero = data.every((d) => d.value === 0);
   if (allZero) {
     return (
-      <p className="text-sm text-ink/40">Ingen nye leads i denne periode.</p>
+      <p className="text-sm text-ink/55">Ingen nye leads i denne periode.</p>
     );
   }
   return (

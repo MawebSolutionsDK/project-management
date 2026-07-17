@@ -45,7 +45,7 @@ export default async function NytProjektPage({
               ))}
             </select>
             {(customers ?? []).length === 0 && (
-              <p className="mt-1 text-xs text-ink/45">
+              <p className="mt-1 text-xs text-ink/60">
                 Ingen kunder endnu — opret en kunde først under Kunder.
               </p>
             )}

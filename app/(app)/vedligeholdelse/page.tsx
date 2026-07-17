@@ -5,7 +5,15 @@ import { Avatar } from "@/components/avatar";
 import { TableSearch } from "@/components/table-search";
 import { RowActions } from "@/components/row-actions";
 import { createClient } from "@/lib/supabase/server";
-import { agreementStatusLabels, agreementStatusTones } from "@/lib/types";
+import {
+  agreementStatusLabels,
+  agreementStatusTones,
+  type MaintenanceAgreement,
+} from "@/lib/types";
+
+type AgreementRow = MaintenanceAgreement & {
+  customer: { name: string } | null;
+};
 import { deleteAgreement } from "./actions";
 
 export default async function VedligeholdelsePage() {
@@ -39,7 +47,7 @@ export default async function VedligeholdelsePage() {
 
       <div className="card overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
+          <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/60">
             <tr>
               <th className="px-5 py-3">Kunde</th>
               <th className="px-5 py-3">Plan</th>
@@ -50,7 +58,7 @@ export default async function VedligeholdelsePage() {
             </tr>
           </thead>
           <tbody>
-            {(agreements ?? []).map((a: any) => (
+            {((agreements ?? []) as AgreementRow[]).map((a) => (
               <tr
                 key={a.id}
                 data-search-row={`${a.customer?.name ?? ""} ${a.plan_name}`}
@@ -95,7 +103,7 @@ export default async function VedligeholdelsePage() {
             ))}
             {(agreements ?? []).length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-8 text-center text-ink/40">
+                <td colSpan={6} className="px-5 py-8 text-center text-ink/55">
                   Ingen aftaler endnu.
                 </td>
               </tr>
