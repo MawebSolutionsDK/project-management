@@ -5,6 +5,7 @@ import AppNav from "@/components/app-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
+import { buildPeriodSummaries, type PeriodStats } from "@/lib/summary";
 
 type Notification = {
   date: string;
@@ -22,6 +23,8 @@ export default async function DashboardPage() {
   if (!user) {
     redirect("/login");
   }
+
+  const summaries = await buildPeriodSummaries(supabase);
 
   const [
     customersRes,
@@ -181,6 +184,41 @@ export default async function DashboardPage() {
                 <p className="mt-3 text-sm text-ink/55">{c.label}</p>
                 <p className="mt-1 text-2xl font-semibold text-ink">{c.value}</p>
               </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {(
+            [
+              { key: "day", label: "I dag" },
+              { key: "week", label: "Seneste 7 dage" },
+              { key: "month", label: "Seneste 30 dage" },
+            ] as const
+          ).map(({ key, label }) => {
+            const s: PeriodStats = summaries[key];
+            const rows: [string, string | number][] = [
+              ["Nye leads", s.newLeads],
+              ["Leads vundet", s.leadsWon],
+              ["Nye kunder", s.newCustomers],
+              ["Nye projekter", s.newProjects],
+              ["Projekter afsluttet", s.projectsCompleted],
+              ["Support løst", `${s.supportResolved} (${s.supportHours} t)`],
+              ["Faktureret", `${s.invoicedAmount.toLocaleString("da-DK")} kr.`],
+              ["Fornyelser i perioden", s.upcomingRenewals],
+            ];
+            return (
+              <div key={key} className="card p-5">
+                <h2 className="text-sm font-semibold text-ink/75">{label}</h2>
+                <ul className="mt-3 space-y-1.5">
+                  {rows.map(([rowLabel, value]) => (
+                    <li key={rowLabel} className="flex items-center justify-between text-sm">
+                      <span className="text-ink/55">{rowLabel}</span>
+                      <span className="font-medium text-ink">{value}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             );
           })}
         </div>
