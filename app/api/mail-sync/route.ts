@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { ImapFlow } from "imapflow";
+import { ImapFlow, type FetchMessageObject } from "imapflow";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+type ServiceClient = ReturnType<typeof createServiceClient>;
 
 interface MailboxConfig {
   address: string;
@@ -25,12 +27,47 @@ function getConfiguredMailboxes(): MailboxConfig[] {
   return configs.filter((c): c is MailboxConfig => c !== null);
 }
 
-async function findMatch(supabase: ReturnType<typeof createServiceClient>, table: "customers" | "leads", email: string) {
+async function findMatch(supabase: ServiceClient, table: "customers" | "leads", email: string) {
   const { data } = await supabase.from(table).select("id").ilike("email", email).limit(1);
   return data && data.length > 0 ? data[0].id : null;
 }
 
-async function syncMailbox(supabase: ReturnType<typeof createServiceClient>, config: MailboxConfig) {
+async function importMessage(supabase: ServiceClient, config: MailboxConfig, message: FetchMessageObject) {
+  const fromEntry = message.envelope?.from?.[0];
+  const fromAddress = fromEntry?.address?.toLowerCase() ?? null;
+  const fromName = fromEntry?.name ?? null;
+  const subject = message.envelope?.subject ?? null;
+  const receivedAt = message.envelope?.date ? new Date(message.envelope.date).toISOString() : null;
+  const messageId = message.envelope?.messageId ?? `${config.address}-uid-${message.uid}`;
+
+  let matchedCustomerId: string | null = null;
+  let matchedLeadId: string | null = null;
+
+  if (fromAddress) {
+    matchedCustomerId = await findMatch(supabase, "customers", fromAddress);
+    if (!matchedCustomerId) {
+      matchedLeadId = await findMatch(supabase, "leads", fromAddress);
+    }
+  }
+
+  const { error: insertError } = await supabase.from("emails").insert({
+    mailbox: config.address,
+    message_id: messageId,
+    imap_uid: message.uid,
+    from_address: fromAddress,
+    from_name: fromName,
+    subject,
+    received_at: receivedAt,
+    matched_customer_id: matchedCustomerId,
+    matched_lead_id: matchedLeadId,
+  });
+
+  if (!insertError) return true;
+  if (insertError.message?.includes("duplicate key")) return false;
+  throw new Error(insertError.message);
+}
+
+async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
   const result: { mailbox: string; imported: number; error: string | null } = {
     mailbox: config.address,
     imported: 0,
@@ -59,7 +96,21 @@ async function syncMailbox(supabase: ReturnType<typeof createServiceClient>, con
         .maybeSingle();
 
       if (!state) {
-        // First run for this mailbox: don't backfill history, start watching from now on.
+        // First run for this mailbox: pick up the last 3 days (so mail sent around setup/testing
+        // isn't silently missed) without backfilling the entire mailbox history.
+        const since = new Date();
+        since.setUTCDate(since.getUTCDate() - 3);
+
+        const recentUids = await client.search({ since }, { uid: true });
+
+        if (recentUids && recentUids.length > 0) {
+          for await (const message of client.fetch(recentUids, { envelope: true, uid: true }, { uid: true })) {
+            if (await importMessage(supabase, config, message)) {
+              result.imported += 1;
+            }
+          }
+        }
+
         await supabase.from("mail_sync_state").insert({
           mailbox: config.address,
           last_uid: (currentUidNext ?? 1) - 1,
@@ -82,40 +133,8 @@ async function syncMailbox(supabase: ReturnType<typeof createServiceClient>, con
 
       for await (const message of client.fetch(`${fromUid}:*`, { envelope: true, uid: true }, { uid: true })) {
         maxUidSeen = Math.max(maxUidSeen, message.uid);
-
-        const fromEntry = message.envelope?.from?.[0];
-        const fromAddress = fromEntry?.address?.toLowerCase() ?? null;
-        const fromName = fromEntry?.name ?? null;
-        const subject = message.envelope?.subject ?? null;
-        const receivedAt = message.envelope?.date ? new Date(message.envelope.date).toISOString() : null;
-        const messageId = message.envelope?.messageId ?? `${config.address}-uid-${message.uid}`;
-
-        let matchedCustomerId: string | null = null;
-        let matchedLeadId: string | null = null;
-
-        if (fromAddress) {
-          matchedCustomerId = await findMatch(supabase, "customers", fromAddress);
-          if (!matchedCustomerId) {
-            matchedLeadId = await findMatch(supabase, "leads", fromAddress);
-          }
-        }
-
-        const { error: insertError } = await supabase.from("emails").insert({
-          mailbox: config.address,
-          message_id: messageId,
-          imap_uid: message.uid,
-          from_address: fromAddress,
-          from_name: fromName,
-          subject,
-          received_at: receivedAt,
-          matched_customer_id: matchedCustomerId,
-          matched_lead_id: matchedLeadId,
-        });
-
-        if (!insertError) {
+        if (await importMessage(supabase, config, message)) {
           result.imported += 1;
-        } else if (!insertError.message?.includes("duplicate key")) {
-          throw new Error(insertError.message);
         }
       }
 
