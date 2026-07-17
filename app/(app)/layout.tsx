@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { createClient } from "@/lib/supabase/server";
+import { buildActiveNotifications } from "@/lib/notifications";
 
 export default async function AppLayout({
   children,
@@ -16,9 +17,11 @@ export default async function AppLayout({
     redirect("/login");
   }
 
+  const notifications = await buildActiveNotifications(supabase);
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar notificationCount={notifications.length} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
         {children}
       </main>

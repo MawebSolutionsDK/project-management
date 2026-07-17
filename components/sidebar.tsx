@@ -15,6 +15,7 @@ import {
   Package,
   ChevronsLeft,
   ChevronsRight,
+  Bell,
 } from "lucide-react";
 import SignOutButton from "./sign-out-button";
 
@@ -24,7 +25,10 @@ type NavGroup = { title: string | null; items: NavItem[] };
 const groups: NavGroup[] = [
   {
     title: null,
-    items: [{ href: "/dashboard", label: "Oversigt", icon: LayoutDashboard }],
+    items: [
+      { href: "/dashboard", label: "Oversigt", icon: LayoutDashboard },
+      { href: "/notifikationer", label: "Notifikationer", icon: Bell },
+    ],
   },
   {
     title: "Salg",
@@ -49,7 +53,11 @@ const groups: NavGroup[] = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  notificationCount = 0,
+}: {
+  notificationCount?: number;
+}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -106,8 +114,20 @@ export function Sidebar() {
                     >
                       <Icon className="h-4 w-4 shrink-0" />
                       {!collapsed && (
-                        <span className="truncate">{item.label}</span>
+                        <span className="flex-1 truncate">{item.label}</span>
                       )}
+                      {item.href === "/notifikationer" &&
+                        notificationCount > 0 && (
+                          <span
+                            className={
+                              collapsed
+                                ? "absolute left-8 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rust px-1 text-[10px] font-semibold text-canvas"
+                                : "flex h-4 min-w-4 items-center justify-center rounded-full bg-rust px-1 text-[10px] font-semibold text-canvas"
+                            }
+                          >
+                            {notificationCount}
+                          </span>
+                        )}
                     </Link>
                   </li>
                 );

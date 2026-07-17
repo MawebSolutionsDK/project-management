@@ -20,22 +20,42 @@ export const FREEMAIL_DOMAINS = new Set([
   "protonmail.com",
 ]);
 
-async function findMatchByAddress(supabase: any, table: "customers" | "leads", email: string) {
-  const { data } = await supabase.from(table).select("id").ilike("email", email).limit(1);
+async function findMatchByAddress(
+  supabase: any,
+  table: "customers" | "leads",
+  email: string,
+) {
+  const { data } = await supabase
+    .from(table)
+    .select("id")
+    .ilike("email", email)
+    .limit(1);
   return data && data.length > 0 ? data[0].id : null;
 }
 
-async function findMatchByDomain(supabase: any, table: "customers" | "leads", domain: string) {
+async function findMatchByDomain(
+  supabase: any,
+  table: "customers" | "leads",
+  domain: string,
+) {
   if (FREEMAIL_DOMAINS.has(domain)) return null;
-  const { data } = await supabase.from(table).select("id").ilike("email", `%@${domain}`).limit(1);
+  const { data } = await supabase
+    .from(table)
+    .select("id")
+    .ilike("email", `%@${domain}`)
+    .limit(1);
   return data && data.length > 0 ? data[0].id : null;
 }
 
 export async function findMatch(
   supabase: any,
-  fromAddress: string
+  fromAddress: string,
 ): Promise<{ matchedCustomerId: string | null; matchedLeadId: string | null }> {
-  let matchedCustomerId = await findMatchByAddress(supabase, "customers", fromAddress);
+  let matchedCustomerId = await findMatchByAddress(
+    supabase,
+    "customers",
+    fromAddress,
+  );
   let matchedLeadId: string | null = null;
   if (!matchedCustomerId) {
     matchedLeadId = await findMatchByAddress(supabase, "leads", fromAddress);
@@ -44,7 +64,11 @@ export async function findMatch(
   if (!matchedCustomerId && !matchedLeadId) {
     const domain = fromAddress.split("@")[1];
     if (domain) {
-      matchedCustomerId = await findMatchByDomain(supabase, "customers", domain);
+      matchedCustomerId = await findMatchByDomain(
+        supabase,
+        "customers",
+        domain,
+      );
       if (!matchedCustomerId) {
         matchedLeadId = await findMatchByDomain(supabase, "leads", domain);
       }

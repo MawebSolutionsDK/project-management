@@ -14,7 +14,18 @@ export async function GET() {
   const { data } = await supabase.from("customers").select("*").order("name");
   const rows = data ?? [];
 
-  const headers = ["Navn", "CVR", "Kontaktperson", "Email", "Telefon", "Branche", "Status", "Internt", "Noter", "Oprettet"];
+  const headers = [
+    "Navn",
+    "CVR",
+    "Kontaktperson",
+    "Email",
+    "Telefon",
+    "Branche",
+    "Status",
+    "Internt",
+    "Noter",
+    "Oprettet",
+  ];
   const lines = [headers.join(",")];
 
   for (const c of rows) {
@@ -30,7 +41,7 @@ export async function GET() {
         csvEscape(c.is_internal ? "Ja" : "Nej"),
         csvEscape(c.notes),
         csvEscape(c.created_at),
-      ].join(",")
+      ].join(","),
     );
   }
 

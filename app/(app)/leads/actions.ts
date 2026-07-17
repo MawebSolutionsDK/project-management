@@ -30,7 +30,10 @@ export async function createLead(formData: FormData) {
 
 export async function updateLead(id: string, formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.from("leads").update(fields(formData)).eq("id", id);
+  const { error } = await supabase
+    .from("leads")
+    .update(fields(formData))
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/leads");
   revalidatePath(`/leads/${id}`);

@@ -44,7 +44,7 @@ export async function GET() {
         csvEscape(p.scope_description),
         csvEscape(p.notes),
         csvEscape(p.created_at),
-      ].join(",")
+      ].join(","),
     );
   }
 

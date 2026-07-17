@@ -19,7 +19,9 @@ function fields(formData: FormData) {
 
 export async function createAgreement(formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.from("maintenance_agreements").insert(fields(formData));
+  const { error } = await supabase
+    .from("maintenance_agreements")
+    .insert(fields(formData));
   if (error) throw new Error(error.message);
   revalidatePath("/vedligeholdelse");
   redirect("/vedligeholdelse");
@@ -27,7 +29,10 @@ export async function createAgreement(formData: FormData) {
 
 export async function updateAgreement(id: string, formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.from("maintenance_agreements").update(fields(formData)).eq("id", id);
+  const { error } = await supabase
+    .from("maintenance_agreements")
+    .update(fields(formData))
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/vedligeholdelse");
   revalidatePath(`/vedligeholdelse/${id}`);
@@ -36,7 +41,10 @@ export async function updateAgreement(id: string, formData: FormData) {
 
 export async function deleteAgreement(id: string, _formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.from("maintenance_agreements").delete().eq("id", id);
+  const { error } = await supabase
+    .from("maintenance_agreements")
+    .delete()
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/vedligeholdelse");
   redirect("/vedligeholdelse");

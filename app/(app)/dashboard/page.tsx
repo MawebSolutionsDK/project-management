@@ -14,13 +14,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
 import { buildPeriodSummaries, type PeriodStats } from "@/lib/summary";
-
-type Notification = {
-  date: string;
-  message: string;
-  tone: "danger" | "warning" | "info";
-  href: string;
-};
+import { buildActiveNotifications } from "@/lib/notifications";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -41,9 +35,7 @@ export default async function DashboardPage() {
     openSupportRes,
     unreadMailRes,
     activeAgreementsRes,
-    leadsForNotifRes,
-    projectsForNotifRes,
-    expensesForNotifRes,
+    notifications,
     recentCustomersRes,
     recentLeadsRes,
     recentProjectsRes,
@@ -75,20 +67,7 @@ export default async function DashboardPage() {
         "id, monthly_price, renewal_date, plan_name, customer:customers(name)",
       )
       .eq("status", "aktiv"),
-    supabase
-      .from("leads")
-      .select("id, name, next_action, next_action_date")
-      .not("status", "in", "(vundet,tabt)")
-      .not("next_action_date", "is", null),
-    supabase
-      .from("projects")
-      .select("id, name, deadline")
-      .not("status", "in", "(afsluttet,efter_service)")
-      .not("deadline", "is", null),
-    supabase
-      .from("business_expenses")
-      .select("id, name, renewal_date")
-      .not("renewal_date", "is", null),
+    buildActiveNotifications(supabase),
     supabase
       .from("customers")
       .select("id, name, created_at")
@@ -151,91 +130,7 @@ export default async function DashboardPage() {
     },
   ];
 
-  // ---- Notifikationer ----
-  const notifications: Notification[] = [];
-
-  for (const lead of leadsForNotifRes.data ?? []) {
-    if (!lead.next_action_date) continue;
-    const d = daysUntil(lead.next_action_date);
-    if (d < 0) {
-      notifications.push({
-        date: lead.next_action_date,
-        message: `Forsinket opfølgning: ${lead.name}`,
-        tone: "danger",
-        href: `/leads/${lead.id}`,
-      });
-    } else if (d <= 7) {
-      notifications.push({
-        date: lead.next_action_date,
-        message: `Opfølgning: ${lead.name}${lead.next_action ? ` – ${lead.next_action}` : ""}`,
-        tone: "warning",
-        href: `/leads/${lead.id}`,
-      });
-    }
-  }
-
-  for (const project of projectsForNotifRes.data ?? []) {
-    if (!project.deadline) continue;
-    const d = daysUntil(project.deadline);
-    if (d < 0) {
-      notifications.push({
-        date: project.deadline,
-        message: `Deadline overskredet: ${project.name}`,
-        tone: "danger",
-        href: `/projekter/${project.id}`,
-      });
-    } else if (d <= 14) {
-      notifications.push({
-        date: project.deadline,
-        message: `Deadline: ${project.name}`,
-        tone: "warning",
-        href: `/projekter/${project.id}`,
-      });
-    }
-  }
-
-  for (const agreement of activeAgreements as any[]) {
-    if (!agreement.renewal_date) continue;
-    const d = daysUntil(agreement.renewal_date);
-    if (d < 0) {
-      notifications.push({
-        date: agreement.renewal_date,
-        message: `Aftale skulle være fornyet: ${agreement.customer?.name ?? "–"} · ${agreement.plan_name}`,
-        tone: "danger",
-        href: `/vedligeholdelse/${agreement.id}`,
-      });
-    } else if (d <= 60) {
-      notifications.push({
-        date: agreement.renewal_date,
-        message: `Aftale fornyes: ${agreement.customer?.name ?? "–"} · ${agreement.plan_name}`,
-        tone: d <= 14 ? "warning" : "info",
-        href: `/vedligeholdelse/${agreement.id}`,
-      });
-    }
-  }
-
-  for (const expense of expensesForNotifRes.data ?? []) {
-    if (!expense.renewal_date) continue;
-    const d = daysUntil(expense.renewal_date);
-    if (d < 0) {
-      notifications.push({
-        date: expense.renewal_date,
-        message: `Udgift skulle være fornyet: ${expense.name}`,
-        tone: "danger",
-        href: `/udgifter/${expense.id}`,
-      });
-    } else if (d <= 30) {
-      notifications.push({
-        date: expense.renewal_date,
-        message: `Udgift fornyes: ${expense.name}`,
-        tone: "warning",
-        href: `/udgifter/${expense.id}`,
-      });
-    }
-  }
-
-  notifications.sort((a, b) => (a.date > b.date ? 1 : -1));
-  const topNotifications = notifications.slice(0, 8);
+  const topNotifications = notifications.slice(0, 5);
 
   // ---- Seneste aktivitet ----
   const activity = [
@@ -333,19 +228,26 @@ export default async function DashboardPage() {
       </h2>
       <div className="mt-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card p-5">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-ink/75">
-            <Bell className="h-4 w-4 text-accent" />
-            Notifikationer
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-ink/75">
+              <Bell className="h-4 w-4 text-accent" />
+              Notifikationer
+            </h2>
+            {notifications.length > 0 && (
+              <span className="text-xs text-ink/40">
+                {notifications.length} i alt
+              </span>
+            )}
+          </div>
           {topNotifications.length === 0 ? (
             <p className="mt-2 text-sm text-ink/40">
               Intet der kræver din opmærksomhed lige nu.
             </p>
           ) : (
             <ul className="mt-3 space-y-2.5">
-              {topNotifications.map((n, i) => (
+              {topNotifications.map((n) => (
                 <li
-                  key={i}
+                  key={n.key}
                   className="flex items-center justify-between gap-3 text-sm"
                 >
                   <Link
@@ -361,6 +263,9 @@ export default async function DashboardPage() {
               ))}
             </ul>
           )}
+          <Link href="/notifikationer" className="link-muted mt-3 inline-block">
+            Se alle notifikationer
+          </Link>
         </div>
 
         <div className="card p-5">

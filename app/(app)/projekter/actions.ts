@@ -15,7 +15,8 @@ function fields(formData: FormData) {
     scope_description: (formData.get("scope_description") as string) || null,
     deadline: (formData.get("deadline") as string) || null,
     price: priceRaw ? Number(priceRaw) : null,
-    invoice_status: (formData.get("invoice_status") as string) || "ikke_faktureret",
+    invoice_status:
+      (formData.get("invoice_status") as string) || "ikke_faktureret",
     links: (formData.get("links") as string) || null,
     notes: (formData.get("notes") as string) || null,
   };
@@ -31,7 +32,10 @@ export async function createProject(formData: FormData) {
 
 export async function updateProject(id: string, formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.from("projects").update(fields(formData)).eq("id", id);
+  const { error } = await supabase
+    .from("projects")
+    .update(fields(formData))
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/projekter");
   revalidatePath(`/projekter/${id}`);

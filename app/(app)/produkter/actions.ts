@@ -26,7 +26,10 @@ export async function createProduct(formData: FormData) {
 
 export async function updateProduct(id: string, formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.from("products").update(fields(formData)).eq("id", id);
+  const { error } = await supabase
+    .from("products")
+    .update(fields(formData))
+    .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/produkter");
   revalidatePath(`/produkter/${id}`);

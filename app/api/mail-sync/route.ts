@@ -32,15 +32,28 @@ function getConfiguredMailboxes(): MailboxConfig[] {
 // Henter et kort tekstuddrag af mailens brødtekst, så en supportsag kan oprettes
 // med et udgangspunkt at redigere videre på. Best-effort: fejler den, importeres
 // mailen stadig - bare uden preview.
-async function fetchPreview(client: ImapFlow, uid: number): Promise<string | null> {
+async function fetchPreview(
+  client: ImapFlow,
+  uid: number,
+): Promise<string | null> {
   try {
-    const { content } = await client.download(uid, undefined, { uid: true, maxBytes: 20000 });
+    const { content } = await client.download(uid, undefined, {
+      uid: true,
+      maxBytes: 20000,
+    });
     if (!content) return null;
     const chunks: Buffer[] = [];
-    for await (const chunk of content as AsyncIterable<Buffer>) chunks.push(chunk);
+    for await (const chunk of content as AsyncIterable<Buffer>)
+      chunks.push(chunk);
     const raw = Buffer.concat(chunks);
     const parsed = await simpleParser(raw);
-    const text = (parsed.text || parsed.html?.toString().replace(/<[^>]+>/g, " ") || "").replace(/\s+/g, " ").trim();
+    const text = (
+      parsed.text ||
+      parsed.html?.toString().replace(/<[^>]+>/g, " ") ||
+      ""
+    )
+      .replace(/\s+/g, " ")
+      .trim();
     return text ? text.slice(0, 500) : null;
   } catch {
     return null;
@@ -51,14 +64,17 @@ async function importMessage(
   supabase: ServiceClient,
   client: ImapFlow,
   config: MailboxConfig,
-  message: FetchMessageObject
+  message: FetchMessageObject,
 ) {
   const fromEntry = message.envelope?.from?.[0];
   const fromAddress = fromEntry?.address?.toLowerCase() ?? null;
   const fromName = fromEntry?.name ?? null;
   const subject = message.envelope?.subject ?? null;
-  const receivedAt = message.envelope?.date ? new Date(message.envelope.date).toISOString() : null;
-  const messageId = message.envelope?.messageId ?? `${config.address}-uid-${message.uid}`;
+  const receivedAt = message.envelope?.date
+    ? new Date(message.envelope.date).toISOString()
+    : null;
+  const messageId =
+    message.envelope?.messageId ?? `${config.address}-uid-${message.uid}`;
 
   let matchedCustomerId: string | null = null;
   let matchedLeadId: string | null = null;
@@ -109,7 +125,10 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
     const lock = await client.getMailboxLock("INBOX");
 
     try {
-      const currentUidNext = client.mailbox && "uidNext" in client.mailbox ? client.mailbox.uidNext : undefined;
+      const currentUidNext =
+        client.mailbox && "uidNext" in client.mailbox
+          ? client.mailbox.uidNext
+          : undefined;
 
       const { data: state } = await supabase
         .from("mail_sync_state")
@@ -126,7 +145,11 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
         const recentUids = await client.search({ since }, { uid: true });
 
         if (recentUids && recentUids.length > 0) {
-          for await (const message of client.fetch(recentUids, { envelope: true, uid: true }, { uid: true })) {
+          for await (const message of client.fetch(
+            recentUids,
+            { envelope: true, uid: true },
+            { uid: true },
+          )) {
             if (await importMessage(supabase, client, config, message)) {
               result.imported += 1;
             }
@@ -153,7 +176,11 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
 
       let maxUidSeen = Number(state.last_uid);
 
-      for await (const message of client.fetch(`${fromUid}:*`, { envelope: true, uid: true }, { uid: true })) {
+      for await (const message of client.fetch(
+        `${fromUid}:*`,
+        { envelope: true, uid: true },
+        { uid: true },
+      )) {
         maxUidSeen = Math.max(maxUidSeen, message.uid);
         if (await importMessage(supabase, client, config, message)) {
           result.imported += 1;
@@ -162,7 +189,10 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
 
       await supabase
         .from("mail_sync_state")
-        .update({ last_uid: maxUidSeen, last_synced_at: new Date().toISOString() })
+        .update({
+          last_uid: maxUidSeen,
+          last_synced_at: new Date().toISOString(),
+        })
         .eq("mailbox", config.address);
     } finally {
       lock.release();
@@ -173,7 +203,11 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
       const plain: Record<string, unknown> = {};
       for (const key of Object.getOwnPropertyNames(err as object)) {
         const value = (err as Record<string, unknown>)[key];
-        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+        if (
+          typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean"
+        ) {
           plain[key] = value;
         }
       }
@@ -194,15 +228,22 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const providedSecret = request.headers.get("x-mail-sync-secret") ?? url.searchParams.get("secret");
+  const providedSecret =
+    request.headers.get("x-mail-sync-secret") ?? url.searchParams.get("secret");
 
-  if (!process.env.MAIL_SYNC_SECRET || providedSecret !== process.env.MAIL_SYNC_SECRET) {
+  if (
+    !process.env.MAIL_SYNC_SECRET ||
+    providedSecret !== process.env.MAIL_SYNC_SECRET
+  ) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const mailboxes = getConfiguredMailboxes();
   if (mailboxes.length === 0) {
-    return NextResponse.json({ error: "no mailboxes configured" }, { status: 500 });
+    return NextResponse.json(
+      { error: "no mailboxes configured" },
+      { status: 500 },
+    );
   }
 
   const supabase = createServiceClient();

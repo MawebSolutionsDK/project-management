@@ -1,12 +1,7 @@
 export type CustomerStatus = "aktiv" | "tidligere";
 
 export type LeadStatus =
-  | "ny"
-  | "kontaktet"
-  | "vurdering_sendt"
-  | "tilbud"
-  | "vundet"
-  | "tabt";
+  "ny" | "kontaktet" | "vurdering_sendt" | "tilbud" | "vundet" | "tabt";
 
 export type ProjectStatus =
   | "forespoergsel"
@@ -166,8 +161,13 @@ export const billingFrequencyLabels: Record<BillingFrequency, string> = {
   aarlig: "Årligt",
 };
 
-export function annualizedCost(expense: { cost: number; billing_frequency: BillingFrequency }): number {
-  return expense.billing_frequency === "maanedlig" ? expense.cost * 12 : expense.cost;
+export function annualizedCost(expense: {
+  cost: number;
+  billing_frequency: BillingFrequency;
+}): number {
+  return expense.billing_frequency === "maanedlig"
+    ? expense.cost * 12
+    : expense.cost;
 }
 
 export const agreementStatusLabels: Record<AgreementStatus, string> = {

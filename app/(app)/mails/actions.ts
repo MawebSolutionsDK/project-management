@@ -4,14 +4,22 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { findMatch } from "@/lib/mail-matching";
 
-export async function toggleRead(id: string, current: boolean, _formData: FormData) {
+export async function toggleRead(
+  id: string,
+  current: boolean,
+  _formData: FormData,
+) {
   const supabase = createClient();
   await supabase.from("emails").update({ is_read: !current }).eq("id", id);
   revalidatePath("/mails");
   revalidatePath("/dashboard");
 }
 
-export async function toggleActioned(id: string, current: boolean, _formData: FormData) {
+export async function toggleActioned(
+  id: string,
+  current: boolean,
+  _formData: FormData,
+) {
   const supabase = createClient();
   await supabase.from("emails").update({ is_actioned: !current }).eq("id", id);
   revalidatePath("/mails");
@@ -53,11 +61,17 @@ export async function rematchUnmatchedEmails(_formData: FormData) {
 
   for (const email of emails ?? []) {
     if (!email.from_address) continue;
-    const { matchedCustomerId, matchedLeadId } = await findMatch(supabase, email.from_address);
+    const { matchedCustomerId, matchedLeadId } = await findMatch(
+      supabase,
+      email.from_address,
+    );
     if (matchedCustomerId || matchedLeadId) {
       await supabase
         .from("emails")
-        .update({ matched_customer_id: matchedCustomerId, matched_lead_id: matchedLeadId })
+        .update({
+          matched_customer_id: matchedCustomerId,
+          matched_lead_id: matchedLeadId,
+        })
         .eq("id", email.id);
     }
   }

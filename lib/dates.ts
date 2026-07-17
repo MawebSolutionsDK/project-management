@@ -3,7 +3,9 @@ export function daysUntil(dateStr: string): number {
   today.setHours(0, 0, 0, 0);
   const target = new Date(dateStr);
   target.setHours(0, 0, 0, 0);
-  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.round(
+    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+  );
 }
 
 export function relativeDayLabel(days: number): string {
