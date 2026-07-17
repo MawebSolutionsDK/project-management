@@ -117,3 +117,63 @@ export const invoiceStatusTones: Record<InvoiceStatus, BadgeTone> = {
   faktureret: "warning",
   betalt: "success",
 };
+
+export type AgreementStatus = "aktiv" | "opsagt" | "udloebet";
+export type SupportStatus = "aaben" | "loest";
+
+export interface MaintenanceAgreement {
+  id: string;
+  customer_id: string;
+  plan_name: string;
+  monthly_price: number;
+  period_years: 1 | 2 | 3;
+  start_date: string;
+  renewal_date: string;
+  status: AgreementStatus;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface SupportCase {
+  id: string;
+  customer_id: string;
+  title: string;
+  description: string | null;
+  hours_spent: number | null;
+  invoice_status: InvoiceStatus;
+  status: SupportStatus;
+  opened_at: string;
+  closed_at: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface BusinessExpense {
+  id: string;
+  name: string;
+  category: string | null;
+  annual_cost: number;
+  renewal_month: number | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export const agreementStatusLabels: Record<AgreementStatus, string> = {
+  aktiv: "Aktiv",
+  opsagt: "Opsagt",
+  udloebet: "Udløbet",
+};
+export const agreementStatusTones: Record<AgreementStatus, BadgeTone> = {
+  aktiv: "success",
+  opsagt: "neutral",
+  udloebet: "danger",
+};
+
+export const supportStatusLabels: Record<SupportStatus, string> = {
+  aaben: "Åben",
+  loest: "Løst",
+};
+export const supportStatusTones: Record<SupportStatus, BadgeTone> = {
+  aaben: "warning",
+  loest: "success",
+};

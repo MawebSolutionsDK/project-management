@@ -6,18 +6,21 @@ const links = [
   { href: "/kunder", label: "Kunder" },
   { href: "/leads", label: "Leads" },
   { href: "/projekter", label: "Projekter" },
+  { href: "/vedligeholdelse", label: "Aftaler" },
+  { href: "/support", label: "Support" },
+  { href: "/udgifter", label: "Udgifter" },
 ];
 
 export default function AppNav({ current }: { current: string }) {
   return (
     <header className="border-b border-line bg-surface">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <span className="text-sm font-semibold tracking-tight text-ink">
             Maweb Solutions
             <span className="ml-1.5 font-normal text-ink/40">· system</span>
           </span>
-          <nav className="flex gap-1">
+          <nav className="flex flex-wrap gap-1">
             {links.map((l) => {
               const active = l.href === current;
               return (
