@@ -14,29 +14,33 @@ export default async function DashboardPage() {
   }
 
   const [customersRes, leadsRes, projectsRes] = await Promise.all([
-    supabase.from("customers").select("*", { count: "exact", head: true }),
+    supabase
+      .from("customers")
+      .select("*", { count: "exact", head: true })
+      .eq("is_internal", false),
     supabase.from("leads").select("*", { count: "exact", head: true }).not("status", "in", "(vundet,tabt)"),
     supabase.from("projects").select("*", { count: "exact", head: true }).not("status", "in", "(afsluttet,efter_service)"),
   ]);
 
+  const cards = [
+    { href: "/kunder", label: "Kunder", value: customersRes.count ?? 0 },
+    { href: "/leads", label: "Åbne leads", value: leadsRes.count ?? 0 },
+    { href: "/projekter", label: "Aktive projekter", value: projectsRes.count ?? 0 },
+  ];
+
   return (
     <>
       <AppNav current="/dashboard" />
-      <main className="mx-auto max-w-3xl p-8">
-        <h1 className="text-xl font-semibold">Velkommen, {user?.email}</h1>
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Link href="/kunder" className="rounded-lg border border-gray-200 bg-white p-5 transition hover:border-gray-400">
-            <p className="text-sm text-gray-500">Kunder</p>
-            <p className="text-2xl font-semibold">{customersRes.count ?? 0}</p>
-          </Link>
-          <Link href="/leads" className="rounded-lg border border-gray-200 bg-white p-5 transition hover:border-gray-400">
-            <p className="text-sm text-gray-500">Åbne leads</p>
-            <p className="text-2xl font-semibold">{leadsRes.count ?? 0}</p>
-          </Link>
-          <Link href="/projekter" className="rounded-lg border border-gray-200 bg-white p-5 transition hover:border-gray-400">
-            <p className="text-sm text-gray-500">Aktive projekter</p>
-            <p className="text-2xl font-semibold">{projectsRes.count ?? 0}</p>
-          </Link>
+      <main className="mx-auto max-w-3xl px-6 py-10">
+        <h1 className="text-2xl font-semibold text-ink">Velkommen, {user?.email}</h1>
+        <p className="mt-1 text-sm text-ink/55">Overblik over kunder, leads og projekter.</p>
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {cards.map((c) => (
+            <Link key={c.href} href={c.href} className="card p-5 transition hover:border-accent/40">
+              <p className="text-sm text-ink/55">{c.label}</p>
+              <p className="mt-1 text-3xl font-semibold text-ink">{c.value}</p>
+            </Link>
+          ))}
         </div>
       </main>
     </>

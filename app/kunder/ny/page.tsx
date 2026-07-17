@@ -6,9 +6,9 @@ export default function NyKundePage() {
   return (
     <>
       <AppNav current="/kunder" />
-      <main className="mx-auto max-w-2xl p-6">
-        <h1 className="mb-4 text-xl font-semibold">Ny kunde</h1>
-        <form action={createCustomer} className="space-y-4 rounded-lg border border-gray-200 bg-white p-6">
+      <main className="mx-auto max-w-2xl px-6 py-10">
+        <h1 className="mb-6 text-2xl font-semibold text-ink">Ny kunde</h1>
+        <form action={createCustomer} className="card space-y-4 p-6">
           <Field label="Navn" name="name" required />
           <Field label="CVR" name="cvr" />
           <Field label="Kontaktperson" name="contact_person" />
@@ -16,17 +16,21 @@ export default function NyKundePage() {
           <Field label="Telefon" name="phone" />
           <Field label="Branche" name="industry" placeholder="fx rejsebureau, lokal service" />
           <div>
-            <label className="mb-1 block text-sm font-medium">Status</label>
-            <select name="status" defaultValue="aktiv" className="w-full rounded border border-gray-300 px-3 py-2 text-sm">
+            <label className="label">Status</label>
+            <select name="status" defaultValue="aktiv" className="input">
               <option value="aktiv">Aktiv</option>
               <option value="tidligere">Tidligere</option>
             </select>
           </div>
+          <label className="flex items-center gap-2 text-sm text-ink/75">
+            <input type="checkbox" name="is_internal" className="h-4 w-4 rounded border-line text-accent focus:ring-accent" />
+            Dette er min egen virksomhed (interne projekter)
+          </label>
           <div>
-            <label className="mb-1 block text-sm font-medium">Noter</label>
-            <textarea name="notes" rows={3} className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+            <label className="label">Noter</label>
+            <textarea name="notes" rows={3} className="input" />
           </div>
-          <button type="submit" className="rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white">
+          <button type="submit" className="btn-primary">
             Gem
           </button>
         </form>

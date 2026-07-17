@@ -14,17 +14,12 @@ export default async function NytProjektPage({
   return (
     <>
       <AppNav current="/projekter" />
-      <main className="mx-auto max-w-2xl p-6">
-        <h1 className="mb-4 text-xl font-semibold">Nyt projekt</h1>
-        <form action={createProject} className="space-y-4 rounded-lg border border-gray-200 bg-white p-6">
+      <main className="mx-auto max-w-2xl px-6 py-10">
+        <h1 className="mb-6 text-2xl font-semibold text-ink">Nyt projekt</h1>
+        <form action={createProject} className="card space-y-4 p-6">
           <div>
-            <label className="mb-1 block text-sm font-medium">Kunde</label>
-            <select
-              name="customer_id"
-              required
-              defaultValue={searchParams.customer_id ?? ""}
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            >
+            <label className="label">Kunde</label>
+            <select name="customer_id" required defaultValue={searchParams.customer_id ?? ""} className="input">
               <option value="" disabled>
                 Vælg kunde
               </option>
@@ -35,16 +30,14 @@ export default async function NytProjektPage({
               ))}
             </select>
             {(customers ?? []).length === 0 && (
-              <p className="mt-1 text-xs text-gray-500">
-                Ingen kunder endnu — opret en kunde først under Kunder.
-              </p>
+              <p className="mt-1 text-xs text-ink/45">Ingen kunder endnu — opret en kunde først under Kunder.</p>
             )}
           </div>
           <Field label="Projektnavn" name="name" placeholder="fx Nyt website, Redesign, SEO-audit" required />
           <Field label="Type" name="type" placeholder="nyt_website, redesign, seo_audit, andet" />
           <div>
-            <label className="mb-1 block text-sm font-medium">Status</label>
-            <select name="status" defaultValue="forespoergsel" className="w-full rounded border border-gray-300 px-3 py-2 text-sm">
+            <label className="label">Status</label>
+            <select name="status" defaultValue="forespoergsel" className="input">
               <option value="forespoergsel">Forespørgsel</option>
               <option value="tilbud_sendt">Tilbud sendt</option>
               <option value="aftalt">Aftalt</option>
@@ -54,14 +47,14 @@ export default async function NytProjektPage({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Scope (kort, konkret)</label>
-            <textarea name="scope_description" rows={3} className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+            <label className="label">Scope (kort, konkret)</label>
+            <textarea name="scope_description" rows={3} className="input" />
           </div>
           <Field label="Deadline" name="deadline" type="date" />
           <Field label="Pris (DKK)" name="price" type="number" />
           <div>
-            <label className="mb-1 block text-sm font-medium">Fakturastatus</label>
-            <select name="invoice_status" defaultValue="ikke_faktureret" className="w-full rounded border border-gray-300 px-3 py-2 text-sm">
+            <label className="label">Fakturastatus</label>
+            <select name="invoice_status" defaultValue="ikke_faktureret" className="input">
               <option value="ikke_faktureret">Ikke faktureret</option>
               <option value="faktureret">Faktureret</option>
               <option value="betalt">Betalt</option>
@@ -69,10 +62,10 @@ export default async function NytProjektPage({
           </div>
           <Field label="Links" name="links" placeholder="fx staging-site, filer" />
           <div>
-            <label className="mb-1 block text-sm font-medium">Noter</label>
-            <textarea name="notes" rows={3} className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+            <label className="label">Noter</label>
+            <textarea name="notes" rows={3} className="input" />
           </div>
-          <button type="submit" className="rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white">
+          <button type="submit" className="btn-primary">
             Gem
           </button>
         </form>

@@ -13,6 +13,7 @@ function fields(formData: FormData) {
     phone: (formData.get("phone") as string) || null,
     industry: (formData.get("industry") as string) || null,
     status: (formData.get("status") as string) || "aktiv",
+    is_internal: formData.get("is_internal") === "on",
     notes: (formData.get("notes") as string) || null,
   };
 }

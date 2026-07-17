@@ -1,7 +1,8 @@
 import Link from "next/link";
 import AppNav from "@/components/app-nav";
+import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
-import { customerStatusLabels } from "@/lib/types";
+import { customerStatusLabels, customerStatusTones } from "@/lib/types";
 
 export default async function KunderPage() {
   const supabase = createClient();
@@ -10,41 +11,51 @@ export default async function KunderPage() {
   return (
     <>
       <AppNav current="/kunder" />
-      <main className="mx-auto max-w-5xl p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Kunder</h1>
-          <Link href="/kunder/ny" className="rounded bg-gray-900 px-3 py-2 text-sm font-medium text-white">
+      <main className="mx-auto max-w-5xl px-6 py-10">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-ink">Kunder</h1>
+            <p className="mt-1 text-sm text-ink/55">Alle kunder, inkl. interne projekter.</p>
+          </div>
+          <Link href="/kunder/ny" className="btn-primary">
             + Ny kunde
           </Link>
         </div>
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="card overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
               <tr>
-                <th className="px-4 py-2">Navn</th>
-                <th className="px-4 py-2">Branche</th>
-                <th className="px-4 py-2">Kontakt</th>
-                <th className="px-4 py-2">Status</th>
+                <th className="px-5 py-3">Navn</th>
+                <th className="px-5 py-3">Branche</th>
+                <th className="px-5 py-3">Kontakt</th>
+                <th className="px-5 py-3">Status</th>
               </tr>
             </thead>
             <tbody>
               {(customers ?? []).map((c) => (
-                <tr key={c.id} className="border-t border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-2">
-                    <Link href={`/kunder/${c.id}`} className="font-medium text-gray-900 hover:underline">
+                <tr key={c.id} className="border-t border-line/70 hover:bg-ink/[0.02]">
+                  <td className="px-5 py-3">
+                    <Link href={`/kunder/${c.id}`} className="font-medium text-ink hover:underline">
                       {c.name}
                     </Link>
+                    {c.is_internal && (
+                      <span className="ml-2 rounded-full bg-ink/[0.06] px-2 py-0.5 text-xs font-medium text-ink/60">
+                        Internt
+                      </span>
+                    )}
                   </td>
-                  <td className="px-4 py-2 text-gray-600">{c.industry ?? "–"}</td>
-                  <td className="px-4 py-2 text-gray-600">{c.contact_person ?? c.email ?? "–"}</td>
-                  <td className="px-4 py-2 text-gray-600">
-                    {customerStatusLabels[c.status as keyof typeof customerStatusLabels] ?? c.status}
+                  <td className="px-5 py-3 text-ink/65">{c.industry ?? "–"}</td>
+                  <td className="px-5 py-3 text-ink/65">{c.contact_person ?? c.email ?? "–"}</td>
+                  <td className="px-5 py-3">
+                    <StatusBadge tone={customerStatusTones[c.status as keyof typeof customerStatusTones]}>
+                      {customerStatusLabels[c.status as keyof typeof customerStatusLabels] ?? c.status}
+                    </StatusBadge>
                   </td>
                 </tr>
               ))}
               {(customers ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={4} className="px-5 py-8 text-center text-ink/40">
                     Ingen kunder endnu.
                   </td>
                 </tr>

@@ -31,38 +31,34 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 rounded-lg border border-gray-200 bg-white p-8 shadow-sm"
-      >
-        <h1 className="text-xl font-semibold">Maweb Solutions – Login</h1>
+    <main className="flex min-h-screen items-center justify-center px-6">
+      <form onSubmit={handleSubmit} className="card w-full max-w-sm space-y-5 p-8">
         <div>
-          <label className="mb-1 block text-sm font-medium">Email</label>
+          <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Maweb Solutions</p>
+          <h1 className="text-xl font-semibold text-ink">Log ind på systemet</h1>
+        </div>
+        <div>
+          <label className="label">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            className="input"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Adgangskode</label>
+          <label className="label">Adgangskode</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            className="input"
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-gray-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+        {error && <p className="text-sm text-rust">{error}</p>}
+        <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">
           {loading ? "Logger ind…" : "Log ind"}
         </button>
       </form>

@@ -22,9 +22,9 @@ export default async function KundeDetailPage({ params }: { params: { id: string
   return (
     <>
       <AppNav current="/kunder" />
-      <main className="mx-auto max-w-2xl p-6">
-        <h1 className="mb-4 text-xl font-semibold">{customer.name}</h1>
-        <form action={updateWithId} className="space-y-4 rounded-lg border border-gray-200 bg-white p-6">
+      <main className="mx-auto max-w-2xl px-6 py-10">
+        <h1 className="mb-6 text-2xl font-semibold text-ink">{customer.name}</h1>
+        <form action={updateWithId} className="card space-y-4 p-6">
           <Field label="Navn" name="name" defaultValue={customer.name} required />
           <Field label="CVR" name="cvr" defaultValue={customer.cvr ?? ""} />
           <Field label="Kontaktperson" name="contact_person" defaultValue={customer.contact_person ?? ""} />
@@ -32,40 +32,49 @@ export default async function KundeDetailPage({ params }: { params: { id: string
           <Field label="Telefon" name="phone" defaultValue={customer.phone ?? ""} />
           <Field label="Branche" name="industry" defaultValue={customer.industry ?? ""} />
           <div>
-            <label className="mb-1 block text-sm font-medium">Status</label>
-            <select name="status" defaultValue={customer.status} className="w-full rounded border border-gray-300 px-3 py-2 text-sm">
+            <label className="label">Status</label>
+            <select name="status" defaultValue={customer.status} className="input">
               <option value="aktiv">Aktiv</option>
               <option value="tidligere">Tidligere</option>
             </select>
           </div>
+          <label className="flex items-center gap-2 text-sm text-ink/75">
+            <input
+              type="checkbox"
+              name="is_internal"
+              defaultChecked={customer.is_internal}
+              className="h-4 w-4 rounded border-line text-accent focus:ring-accent"
+            />
+            Dette er min egen virksomhed (interne projekter)
+          </label>
           <div>
-            <label className="mb-1 block text-sm font-medium">Noter</label>
-            <textarea name="notes" rows={3} defaultValue={customer.notes ?? ""} className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+            <label className="label">Noter</label>
+            <textarea name="notes" rows={3} defaultValue={customer.notes ?? ""} className="input" />
           </div>
-          <button type="submit" className="rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white">
+          <button type="submit" className="btn-primary">
             Gem ændringer
           </button>
         </form>
 
         <form action={deleteWithId} className="mt-3">
-          <button type="submit" className="text-sm text-red-600 underline hover:text-red-800">
+          <button type="submit" className="link-danger">
             Slet kunde
           </button>
         </form>
 
         <div className="mt-8">
-          <h2 className="mb-2 text-sm font-semibold text-gray-700">Projekter for denne kunde</h2>
+          <h2 className="mb-2 text-sm font-semibold text-ink/70">Projekter for denne kunde</h2>
           <ul className="space-y-1">
             {(projects ?? []).map((p) => (
               <li key={p.id}>
-                <Link href={`/projekter/${p.id}`} className="text-sm text-gray-700 hover:underline">
+                <Link href={`/projekter/${p.id}`} className="text-sm text-ink/75 hover:underline">
                   {p.name}
                 </Link>
               </li>
             ))}
-            {(projects ?? []).length === 0 && <li className="text-sm text-gray-400">Ingen projekter endnu.</li>}
+            {(projects ?? []).length === 0 && <li className="text-sm text-ink/40">Ingen projekter endnu.</li>}
           </ul>
-          <Link href={`/projekter/ny?customer_id=${customer.id}`} className="mt-2 inline-block text-sm text-gray-500 underline">
+          <Link href={`/projekter/ny?customer_id=${customer.id}`} className="link-muted mt-2 inline-block">
             + Opret projekt til denne kunde
           </Link>
         </div>

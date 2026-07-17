@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 function fields(formData: FormData) {
+  const customerId = (formData.get("customer_id") as string) || "";
   return {
     name: formData.get("name") as string,
     contact_person: (formData.get("contact_person") as string) || null,
@@ -12,6 +13,7 @@ function fields(formData: FormData) {
     phone: (formData.get("phone") as string) || null,
     source: (formData.get("source") as string) || null,
     status: (formData.get("status") as string) || "ny",
+    customer_id: customerId || null,
     next_action: (formData.get("next_action") as string) || null,
     next_action_date: (formData.get("next_action_date") as string) || null,
     notes: (formData.get("notes") as string) || null,

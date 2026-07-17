@@ -17,17 +17,12 @@ export default async function ProjektDetailPage({ params }: { params: { id: stri
   return (
     <>
       <AppNav current="/projekter" />
-      <main className="mx-auto max-w-2xl p-6">
-        <h1 className="mb-4 text-xl font-semibold">{project.name}</h1>
-        <form action={updateWithId} className="space-y-4 rounded-lg border border-gray-200 bg-white p-6">
+      <main className="mx-auto max-w-2xl px-6 py-10">
+        <h1 className="mb-6 text-2xl font-semibold text-ink">{project.name}</h1>
+        <form action={updateWithId} className="card space-y-4 p-6">
           <div>
-            <label className="mb-1 block text-sm font-medium">Kunde</label>
-            <select
-              name="customer_id"
-              required
-              defaultValue={project.customer_id}
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            >
+            <label className="label">Kunde</label>
+            <select name="customer_id" required defaultValue={project.customer_id} className="input">
               {(customers ?? []).map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -38,8 +33,8 @@ export default async function ProjektDetailPage({ params }: { params: { id: stri
           <Field label="Projektnavn" name="name" defaultValue={project.name} required />
           <Field label="Type" name="type" defaultValue={project.type ?? ""} />
           <div>
-            <label className="mb-1 block text-sm font-medium">Status</label>
-            <select name="status" defaultValue={project.status} className="w-full rounded border border-gray-300 px-3 py-2 text-sm">
+            <label className="label">Status</label>
+            <select name="status" defaultValue={project.status} className="input">
               <option value="forespoergsel">Forespørgsel</option>
               <option value="tilbud_sendt">Tilbud sendt</option>
               <option value="aftalt">Aftalt</option>
@@ -49,23 +44,14 @@ export default async function ProjektDetailPage({ params }: { params: { id: stri
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Scope (kort, konkret)</label>
-            <textarea
-              name="scope_description"
-              rows={3}
-              defaultValue={project.scope_description ?? ""}
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            />
+            <label className="label">Scope (kort, konkret)</label>
+            <textarea name="scope_description" rows={3} defaultValue={project.scope_description ?? ""} className="input" />
           </div>
           <Field label="Deadline" name="deadline" type="date" defaultValue={project.deadline ?? ""} />
           <Field label="Pris (DKK)" name="price" type="number" defaultValue={project.price?.toString() ?? ""} />
           <div>
-            <label className="mb-1 block text-sm font-medium">Fakturastatus</label>
-            <select
-              name="invoice_status"
-              defaultValue={project.invoice_status}
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            >
+            <label className="label">Fakturastatus</label>
+            <select name="invoice_status" defaultValue={project.invoice_status} className="input">
               <option value="ikke_faktureret">Ikke faktureret</option>
               <option value="faktureret">Faktureret</option>
               <option value="betalt">Betalt</option>
@@ -73,16 +59,16 @@ export default async function ProjektDetailPage({ params }: { params: { id: stri
           </div>
           <Field label="Links" name="links" defaultValue={project.links ?? ""} />
           <div>
-            <label className="mb-1 block text-sm font-medium">Noter</label>
-            <textarea name="notes" rows={3} defaultValue={project.notes ?? ""} className="w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+            <label className="label">Noter</label>
+            <textarea name="notes" rows={3} defaultValue={project.notes ?? ""} className="input" />
           </div>
-          <button type="submit" className="rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white">
+          <button type="submit" className="btn-primary">
             Gem ændringer
           </button>
         </form>
 
         <form action={deleteWithId} className="mt-3">
-          <button type="submit" className="text-sm text-red-600 underline hover:text-red-800">
+          <button type="submit" className="link-danger">
             Slet projekt
           </button>
         </form>
