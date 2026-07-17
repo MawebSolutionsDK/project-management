@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, Target, Briefcase, RefreshCw, LifeBuoy, Receipt } from "lucide-react";
+import { LayoutDashboard, Users, Target, Briefcase, RefreshCw, LifeBuoy, Receipt, Mail } from "lucide-react";
 import SignOutButton from "./sign-out-button";
 
 const links = [
@@ -10,6 +10,7 @@ const links = [
   { href: "/vedligeholdelse", label: "Aftaler", icon: RefreshCw },
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/udgifter", label: "Udgifter", icon: Receipt },
+  { href: "/mails", label: "Mails", icon: Mail },
 ];
 
 export default function AppNav({ current }: { current: string }) {

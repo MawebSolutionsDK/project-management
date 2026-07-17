@@ -1,0 +1,15 @@
+name: Mail sync
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger mail sync endpoint
+        run: |
+          curl -sS -f -X GET "https://system.mawebsolutions.dk/api/mail-sync" \
+            -H "x-mail-sync-secret: ${{ secrets.MAIL_SYNC_SECRET }}"

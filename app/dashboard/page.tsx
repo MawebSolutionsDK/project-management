@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, Target, Briefcase, Wallet, LifeBuoy, Bell, Clock } from "lucide-react";
+import { Users, Target, Briefcase, Wallet, LifeBuoy, Bell, Clock, Mail } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
@@ -31,6 +31,7 @@ export default async function DashboardPage() {
     leadsCountRes,
     projectsCountRes,
     openSupportRes,
+    unreadMailRes,
     activeAgreementsRes,
     leadsForNotifRes,
     projectsForNotifRes,
@@ -43,6 +44,11 @@ export default async function DashboardPage() {
     supabase.from("leads").select("*", { count: "exact", head: true }).not("status", "in", "(vundet,tabt)"),
     supabase.from("projects").select("*", { count: "exact", head: true }).not("status", "in", "(afsluttet,efter_service)"),
     supabase.from("support_cases").select("*", { count: "exact", head: true }).eq("status", "aaben"),
+    supabase
+      .from("emails")
+      .select("*", { count: "exact", head: true })
+      .eq("is_read", false)
+      .or("matched_customer_id.not.is.null,matched_lead_id.not.is.null"),
     supabase
       .from("maintenance_agreements")
       .select("id, monthly_price, renewal_date, plan_name, customer:customers(name)")
@@ -72,6 +78,7 @@ export default async function DashboardPage() {
     { href: "/projekter", label: "Aktive projekter", value: projectsCountRes.count ?? 0, icon: Briefcase },
     { href: "/vedligeholdelse", label: "MRR", value: `${mrr.toLocaleString("da-DK")} kr.`, icon: Wallet },
     { href: "/support", label: "Åbne supportsager", value: openSupportRes.count ?? 0, icon: LifeBuoy },
+    { href: "/mails?filter=unread", label: "Ulæste kunde-mails", value: unreadMailRes.count ?? 0, icon: Mail },
   ];
 
   // ---- Notifikationer ----
@@ -175,7 +182,7 @@ export default async function DashboardPage() {
       <main className="mx-auto max-w-4xl px-6 py-10">
         <h1 className="text-2xl font-semibold text-ink">Velkommen, {user?.email}</h1>
         <p className="mt-1 text-sm text-ink/55">Overblik over kunder, leads, projekter og drift.</p>
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {cards.map((c) => {
             const Icon = c.icon;
             return (

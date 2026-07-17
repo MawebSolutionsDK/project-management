@@ -49,3 +49,22 @@ Log ind med den bruger, du oprettede i trin 2 → skal vise dashboard-placeholde
 
 ## Næste fase
 Fase 1: Kunder, Projekter og Leads som rigtige datamoduler (databasetabeller + lister/formularer).
+
+## Mail-integration (ma@mawebsolutions.dk)
+
+Overvåger indboksen via IMAP (mail.simply.com, port 143 + STARTTLS) hvert 15. minut via en GitHub Actions-workflow,
+matcher afsendere mod kunder/leads, og logger dem i `emails`-tabellen. Ingen mailtekst gemmes, kun afsender/emne/dato.
+
+**Miljøvariabler i Vercel (Project Settings -> Environment Variables):**
+- `SUPABASE_SERVICE_ROLE_KEY` - fra Supabase -> Project Settings -> API -> service_role (bypasser RLS, kun brugt server-side i /api/mail-sync)
+- `MAIL_SYNC_SECRET` - en tilfældig streng, delt med GitHub Actions-secret'en af samme navn, bruges til at godkende kald til /api/mail-sync
+- `MA_IMAP_PASSWORD` - adgangskoden til ma@mawebsolutions.dk
+
+**GitHub repo secret (Settings -> Secrets and variables -> Actions):**
+- `MAIL_SYNC_SECRET` - samme værdi som i Vercel
+
+Første gang synkroniseringen kører for en postkasse, importeres intet - den "starter fra nu" og henter kun nye mails
+derefter, for ikke at importere hele mailhistorikken.
+
+Tilføj sales@ eller info@ senere ved at udvide `getConfiguredMailboxes()` i `app/api/mail-sync/route.ts` med endnu
+en konto, tilknyttet sin egen `*_IMAP_PASSWORD`-miljøvariabel.
