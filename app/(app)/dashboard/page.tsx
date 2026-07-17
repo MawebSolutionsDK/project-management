@@ -19,6 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
 import { buildPeriodSummaries, type PeriodStats } from "@/lib/summary";
 import { buildActiveNotifications } from "@/lib/notifications";
+import { buildActivityLog } from "@/lib/activity";
 import { buildMrrGrowth, buildNewLeadsPerWeek } from "@/lib/charts";
 
 export default async function DashboardPage() {
@@ -41,9 +42,7 @@ export default async function DashboardPage() {
     unreadMailRes,
     activeAgreementsRes,
     notifications,
-    recentCustomersRes,
-    recentLeadsRes,
-    recentProjectsRes,
+    activityEvents,
     mrrGrowthData,
     leadsPerWeekData,
   ] = await Promise.all([
@@ -75,21 +74,7 @@ export default async function DashboardPage() {
       )
       .eq("status", "aktiv"),
     buildActiveNotifications(supabase),
-    supabase
-      .from("customers")
-      .select("id, name, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5),
-    supabase
-      .from("leads")
-      .select("id, name, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5),
-    supabase
-      .from("projects")
-      .select("id, name, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5),
+    buildActivityLog(supabase),
     buildMrrGrowth(supabase),
     buildNewLeadsPerWeek(supabase),
   ]);
@@ -157,25 +142,7 @@ export default async function DashboardPage() {
   const topNotifications = notifications.slice(0, 5);
 
   // ---- Seneste aktivitet ----
-  const activity = [
-    ...(recentCustomersRes.data ?? []).map((c) => ({
-      label: `Ny kunde: ${c.name}`,
-      href: `/kunder/${c.id}`,
-      created_at: c.created_at,
-    })),
-    ...(recentLeadsRes.data ?? []).map((l) => ({
-      label: `Nyt lead: ${l.name}`,
-      href: `/leads/${l.id}`,
-      created_at: l.created_at,
-    })),
-    ...(recentProjectsRes.data ?? []).map((p) => ({
-      label: `Nyt projekt: ${p.name}`,
-      href: `/projekter/${p.id}`,
-      created_at: p.created_at,
-    })),
-  ]
-    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
-    .slice(0, 8);
+  const activity = activityEvents.slice(0, 8);
 
   return (
     <>
@@ -331,8 +298,8 @@ export default async function DashboardPage() {
             <p className="mt-2 text-sm text-ink/40">Ingen aktivitet endnu.</p>
           ) : (
             <ul className="mt-3 space-y-2.5">
-              {activity.map((a, i) => (
-                <li key={i} className="text-sm">
+              {activity.map((a) => (
+                <li key={a.key} className="text-sm">
                   <Link href={a.href} className="text-ink/80 hover:underline">
                     {a.label}
                   </Link>
@@ -340,6 +307,9 @@ export default async function DashboardPage() {
               ))}
             </ul>
           )}
+          <Link href="/aktivitet" className="link-muted mt-3 inline-block">
+            Se hele aktivitetsloggen
+          </Link>
         </div>
       </div>
     </>

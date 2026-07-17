@@ -1,7 +1,19 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/kunder", "/leads", "/projekter", "/vedligeholdelse", "/support", "/udgifter", "/mails", "/produkter", "/notifikationer"];
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/kunder",
+  "/leads",
+  "/projekter",
+  "/vedligeholdelse",
+  "/support",
+  "/udgifter",
+  "/mails",
+  "/produkter",
+  "/notifikationer",
+  "/aktivitet",
+];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
@@ -16,23 +28,29 @@ export async function middleware(request: NextRequest) {
         },
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options });
-          response = NextResponse.next({ request: { headers: request.headers } });
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          });
           response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: "", ...options });
-          response = NextResponse.next({ request: { headers: request.headers } });
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          });
           response.cookies.set({ name, value: "", ...options });
         },
       },
-    }
+    },
   );
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) => request.nextUrl.pathname.startsWith(prefix));
+  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
+    request.nextUrl.pathname.startsWith(prefix),
+  );
 
   if (!user && isProtected) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -46,5 +64,18 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/kunder/:path*", "/leads/:path*", "/projekter/:path*", "/vedligeholdelse/:path*", "/support/:path*", "/udgifter/:path*", "/mails/:path*", "/produkter/:path*", "/notifikationer/:path*", "/login"],
+  matcher: [
+    "/dashboard/:path*",
+    "/kunder/:path*",
+    "/leads/:path*",
+    "/projekter/:path*",
+    "/vedligeholdelse/:path*",
+    "/support/:path*",
+    "/udgifter/:path*",
+    "/mails/:path*",
+    "/produkter/:path*",
+    "/notifikationer/:path*",
+    "/aktivitet/:path*",
+    "/login",
+  ],
 };

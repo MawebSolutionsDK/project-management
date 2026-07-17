@@ -17,6 +17,7 @@ import {
   ChevronsRight,
   Bell,
   Search,
+  Clock,
 } from "lucide-react";
 import SignOutButton from "./sign-out-button";
 
@@ -29,6 +30,7 @@ const groups: NavGroup[] = [
     items: [
       { href: "/dashboard", label: "Oversigt", icon: LayoutDashboard },
       { href: "/notifikationer", label: "Notifikationer", icon: Bell },
+      { href: "/aktivitet", label: "Aktivitet", icon: Clock },
     ],
   },
   {
