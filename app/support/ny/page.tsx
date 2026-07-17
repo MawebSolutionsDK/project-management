@@ -5,7 +5,11 @@ import { Field } from "@/components/form-field";
 import { createClient } from "@/lib/supabase/server";
 import { createSupportCase } from "../actions";
 
-export default async function NySupportsagPage({ searchParams }: { searchParams: { customer_id?: string } }) {
+export default async function NySupportsagPage({
+  searchParams,
+}: {
+  searchParams: { customer_id?: string; title?: string; description?: string; email_id?: string };
+}) {
   const supabase = createClient();
   const { data: customers } = await supabase.from("customers").select("id, name").order("name");
 
@@ -16,7 +20,14 @@ export default async function NySupportsagPage({ searchParams }: { searchParams:
         <div className="mx-auto max-w-2xl">
         <BackLink href="/support" label="Tilbage til support" />
         <h1 className="mb-6 text-2xl font-semibold text-ink">Ny supportsag</h1>
+        {searchParams.email_id && (
+          <p className="mb-4 rounded-md bg-accent-soft px-3 py-2 text-xs text-accent">
+            Oprettet ud fra en mail. Titel, beskrivelse og kunde er foreslået automatisk - ret til efter behov, og
+            godkend ved at gemme. Mailen markeres som handlet, når du gemmer.
+          </p>
+        )}
         <form action={createSupportCase} className="card space-y-4 p-6">
+          {searchParams.email_id && <input type="hidden" name="email_id" value={searchParams.email_id} />}
           <div>
             <label className="label">Kunde</label>
             <select name="customer_id" required defaultValue={searchParams.customer_id ?? ""} className="input">
@@ -30,10 +41,16 @@ export default async function NySupportsagPage({ searchParams }: { searchParams:
               ))}
             </select>
           </div>
-          <Field label="Titel" name="title" placeholder="fx Fejl på kontaktformular" required />
+          <Field
+            label="Titel"
+            name="title"
+            placeholder="fx Fejl på kontaktformular"
+            defaultValue={searchParams.title}
+            required
+          />
           <div>
             <label className="label">Beskrivelse</label>
-            <textarea name="description" rows={3} className="input" />
+            <textarea name="description" rows={4} defaultValue={searchParams.description} className="input" />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Timeforbrug" name="hours_spent" type="number" />

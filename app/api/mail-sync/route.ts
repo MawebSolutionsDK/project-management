@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ImapFlow, type FetchMessageObject } from "imapflow";
+import { simpleParser } from "mailparser";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,23 @@ interface MailboxConfig {
   imapUser: string;
   imapPassword: string;
 }
+
+// Almindelige gratis mail-udbydere - domænematch her ville give falske positiver
+// (mange forskellige kunder/leads kan sagtens dele "gmail.com" osv).
+const FREEMAIL_DOMAINS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "hotmail.com",
+  "outlook.com",
+  "live.com",
+  "yahoo.com",
+  "yahoo.co.uk",
+  "icloud.com",
+  "me.com",
+  "msn.com",
+  "aol.com",
+  "protonmail.com",
+]);
 
 // Add sales@ / info@ here later, each backed by its own *_IMAP_PASSWORD env var.
 function getConfiguredMailboxes(): MailboxConfig[] {
@@ -27,12 +45,61 @@ function getConfiguredMailboxes(): MailboxConfig[] {
   return configs.filter((c): c is MailboxConfig => c !== null);
 }
 
-async function findMatch(supabase: ServiceClient, table: "customers" | "leads", email: string) {
+async function findMatchByAddress(supabase: ServiceClient, table: "customers" | "leads", email: string) {
   const { data } = await supabase.from(table).select("id").ilike("email", email).limit(1);
   return data && data.length > 0 ? data[0].id : null;
 }
 
-async function importMessage(supabase: ServiceClient, config: MailboxConfig, message: FetchMessageObject) {
+async function findMatchByDomain(supabase: ServiceClient, table: "customers" | "leads", domain: string) {
+  if (FREEMAIL_DOMAINS.has(domain)) return null;
+  const { data } = await supabase.from(table).select("id").ilike("email", `%@${domain}`).limit(1);
+  return data && data.length > 0 ? data[0].id : null;
+}
+
+// Henter et kort tekstuddrag af mailens brødtekst, så en supportsag kan oprettes
+// med et udgangspunkt at redigere videre på. Best-effort: fejler den, importeres
+// mailen stadig - bare uden preview.
+async function fetchPreview(client: ImapFlow, uid: number): Promise<string | null> {
+  try {
+    const { content } = await client.download(uid, undefined, { uid: true, maxBytes: 20000 });
+    if (!content) return null;
+    const chunks: Buffer[] = [];
+    for await (const chunk of content as AsyncIterable<Buffer>) chunks.push(chunk);
+    const raw = Buffer.concat(chunks);
+    const parsed = await simpleParser(raw);
+    const text = (parsed.text || parsed.html?.toString().replace(/<[^>]+>/g, " ") || "").replace(/\s+/g, " ").trim();
+    return text ? text.slice(0, 500) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function findMatch(supabase: ServiceClient, fromAddress: string) {
+  let matchedCustomerId = await findMatchByAddress(supabase, "customers", fromAddress);
+  let matchedLeadId: string | null = null;
+  if (!matchedCustomerId) {
+    matchedLeadId = await findMatchByAddress(supabase, "leads", fromAddress);
+  }
+
+  if (!matchedCustomerId && !matchedLeadId) {
+    const domain = fromAddress.split("@")[1];
+    if (domain) {
+      matchedCustomerId = await findMatchByDomain(supabase, "customers", domain);
+      if (!matchedCustomerId) {
+        matchedLeadId = await findMatchByDomain(supabase, "leads", domain);
+      }
+    }
+  }
+
+  return { matchedCustomerId, matchedLeadId };
+}
+
+async function importMessage(
+  supabase: ServiceClient,
+  client: ImapFlow,
+  config: MailboxConfig,
+  message: FetchMessageObject
+) {
   const fromEntry = message.envelope?.from?.[0];
   const fromAddress = fromEntry?.address?.toLowerCase() ?? null;
   const fromName = fromEntry?.name ?? null;
@@ -44,11 +111,12 @@ async function importMessage(supabase: ServiceClient, config: MailboxConfig, mes
   let matchedLeadId: string | null = null;
 
   if (fromAddress) {
-    matchedCustomerId = await findMatch(supabase, "customers", fromAddress);
-    if (!matchedCustomerId) {
-      matchedLeadId = await findMatch(supabase, "leads", fromAddress);
-    }
+    const match = await findMatch(supabase, fromAddress);
+    matchedCustomerId = match.matchedCustomerId;
+    matchedLeadId = match.matchedLeadId;
   }
+
+  const preview = await fetchPreview(client, message.uid);
 
   const { error: insertError } = await supabase.from("emails").insert({
     mailbox: config.address,
@@ -58,6 +126,7 @@ async function importMessage(supabase: ServiceClient, config: MailboxConfig, mes
     from_name: fromName,
     subject,
     received_at: receivedAt,
+    preview,
     matched_customer_id: matchedCustomerId,
     matched_lead_id: matchedLeadId,
   });
@@ -105,7 +174,7 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
 
         if (recentUids && recentUids.length > 0) {
           for await (const message of client.fetch(recentUids, { envelope: true, uid: true }, { uid: true })) {
-            if (await importMessage(supabase, config, message)) {
+            if (await importMessage(supabase, client, config, message)) {
               result.imported += 1;
             }
           }
@@ -133,7 +202,7 @@ async function syncMailbox(supabase: ServiceClient, config: MailboxConfig) {
 
       for await (const message of client.fetch(`${fromUid}:*`, { envelope: true, uid: true }, { uid: true })) {
         maxUidSeen = Math.max(maxUidSeen, message.uid);
-        if (await importMessage(supabase, config, message)) {
+        if (await importMessage(supabase, client, config, message)) {
           result.imported += 1;
         }
       }

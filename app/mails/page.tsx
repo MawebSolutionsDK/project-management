@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Mail, CheckCircle2, Circle } from "lucide-react";
+import { Mail, CheckCircle2, Circle, Wrench, Trash2 } from "lucide-react";
 import AppNav from "@/components/app-nav";
+import { EmailMatchSelect } from "@/components/email-match-select";
 import { createClient } from "@/lib/supabase/server";
-import { toggleRead, toggleActioned } from "./actions";
+import { toggleRead, toggleActioned, setMatchedCustomer, deleteEmailAction } from "./actions";
 
 export default async function MailsPage({ searchParams }: { searchParams: { filter?: string } }) {
   const filter = searchParams.filter ?? "unread";
@@ -18,10 +19,11 @@ export default async function MailsPage({ searchParams }: { searchParams: { filt
   if (filter === "unactioned") query = query.eq("is_actioned", false);
 
   const { data: emails } = await query;
+  const { data: customers } = await supabase.from("customers").select("id, name").order("name");
 
   const tabs = [
     { key: "unread", label: "Ulæste" },
-    { key: "unactioned", label: "Uhandlede" },
+    { key: "unactioned", label: "Ubehandlet mail" },
     { key: "all", label: "Alle" },
   ];
 
@@ -65,33 +67,59 @@ export default async function MailsPage({ searchParams }: { searchParams: { filt
                 <th className="px-5 py-3">Modtaget</th>
                 <th className="px-5 py-3">Læst</th>
                 <th className="px-5 py-3">Handlet</th>
+                <th className="px-5 py-3">Handling</th>
               </tr>
             </thead>
             <tbody>
               {(emails ?? []).map((e: any) => {
                 const readAction = toggleRead.bind(null, e.id, e.is_read);
                 const actionedAction = toggleActioned.bind(null, e.id, e.is_actioned);
+                const matchAction = setMatchedCustomer.bind(null, e.id);
+                const deleteAction = deleteEmailAction.bind(null, e.id);
                 const matchHref = e.matched_customer_id
                   ? `/kunder/${e.matched_customer_id}`
                   : e.matched_lead_id
                     ? `/leads/${e.matched_lead_id}`
                     : null;
                 const matchLabel = e.customer?.name ?? e.lead?.name ?? null;
+
+                const caseParams = new URLSearchParams();
+                if (e.matched_customer_id) caseParams.set("customer_id", e.matched_customer_id);
+                if (e.subject) caseParams.set("title", e.subject);
+                const descriptionParts = [
+                  e.from_name || e.from_address ? `Fra: ${e.from_name || ""} <${e.from_address || ""}>` : null,
+                  e.preview || null,
+                ].filter(Boolean);
+                if (descriptionParts.length > 0) caseParams.set("description", descriptionParts.join("\n\n"));
+                caseParams.set("email_id", e.id);
+
                 return (
                   <tr key={e.id} className={`border-t border-line/70 hover:bg-ink/[0.02] ${!e.is_read ? "font-medium" : ""}`}>
                     <td className="px-5 py-3 text-ink/80">{e.from_name || e.from_address || "Ukendt"}</td>
-                    <td className="px-5 py-3 text-ink/80">{e.subject || "(intet emne)"}</td>
-                    <td className="px-5 py-3">
-                      {matchHref ? (
-                        <Link
-                          href={matchHref}
-                          className="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent hover:underline"
-                        >
-                          {matchLabel}
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-ink/35">Ingen match</span>
+                    <td className="px-5 py-3 text-ink/80">
+                      <div>{e.subject || "(intet emne)"}</div>
+                      {e.preview && (
+                        <div className="mt-0.5 max-w-xs truncate text-xs font-normal text-ink/40" title={e.preview}>
+                          {e.preview}
+                        </div>
                       )}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="space-y-1.5">
+                        {matchHref && matchLabel && (
+                          <Link
+                            href={matchHref}
+                            className="inline-block rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent hover:underline"
+                          >
+                            {matchLabel}
+                          </Link>
+                        )}
+                        <EmailMatchSelect
+                          customers={customers ?? []}
+                          defaultCustomerId={e.matched_customer_id}
+                          action={matchAction}
+                        />
+                      </div>
                     </td>
                     <td className="px-5 py-3 text-ink/55">
                       {e.received_at ? new Date(e.received_at).toLocaleString("da-DK") : "–"}
@@ -118,12 +146,33 @@ export default async function MailsPage({ searchParams }: { searchParams: { filt
                         </button>
                       </form>
                     </td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/support/ny?${caseParams.toString()}`}
+                          className="flex items-center gap-1 text-xs font-medium text-ink/55 transition hover:text-accent"
+                          title="Opret supportsag ud fra denne mail"
+                        >
+                          <Wrench className="h-3.5 w-3.5" />
+                          Supportsag
+                        </Link>
+                        <form action={deleteAction}>
+                          <button
+                            type="submit"
+                            className="text-ink/40 transition hover:text-rust"
+                            title="Slet mail fra systemet"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </form>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
               {(emails ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-ink/40">
+                  <td colSpan={7} className="px-5 py-8 text-center text-ink/40">
                     Ingen mails at vise endnu.
                   </td>
                 </tr>

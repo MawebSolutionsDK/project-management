@@ -23,6 +23,16 @@ export async function createSupportCase(formData: FormData) {
   const supabase = createClient();
   const { error } = await supabase.from("support_cases").insert(fields(formData));
   if (error) throw new Error(error.message);
+
+  // Hvis sagen er oprettet ud fra en mail (se app/mails/page.tsx "Supportsag"-linket),
+  // markér kilde-mailen som læst og handlet, så den forsvinder fra "Ubehandlet mail".
+  const emailId = formData.get("email_id") as string | null;
+  if (emailId) {
+    await supabase.from("emails").update({ is_read: true, is_actioned: true }).eq("id", emailId);
+    revalidatePath("/mails");
+    revalidatePath("/dashboard");
+  }
+
   revalidatePath("/support");
   redirect("/support");
 }
