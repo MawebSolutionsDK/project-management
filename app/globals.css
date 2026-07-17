@@ -10,7 +10,7 @@
 
 @layer components {
   .card {
-    @apply rounded-xl border border-line bg-surface shadow-[0_1px_2px_rgba(43,42,39,0.04)];
+    @apply rounded-xl border border-line bg-surface shadow-[0_1px_0_rgba(255,255,255,0.03),0_8px_24px_rgba(0,0,0,0.35)];
   }
   .input {
     @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink/35 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;

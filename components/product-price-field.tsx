@@ -51,7 +51,9 @@ export function ProductPriceField({
             </option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-ink/45">Prisen udfyldes automatisk, men kan altid tilpasses.</p>
+        <p className="mt-1 text-xs text-ink/45">
+          Prisen udfyldes automatisk, men kan altid tilpasses.
+        </p>
       </div>
       <div>
         <label className="label">{priceLabel}</label>

@@ -8,7 +8,13 @@ const toneClasses: Record<BadgeTone, string> = {
   danger: "bg-rust-soft text-rust",
 };
 
-export function StatusBadge({ tone, children }: { tone: BadgeTone; children: React.ReactNode }) {
+export function StatusBadge({
+  tone,
+  children,
+}: {
+  tone: BadgeTone;
+  children: React.ReactNode;
+}) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${toneClasses[tone]}`}
