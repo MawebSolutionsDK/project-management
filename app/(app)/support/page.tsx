@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { Plus, LifeBuoy } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { ViewToggle } from "@/components/view-toggle";
+import {
+  KanbanBoard,
+  type KanbanCard,
+  type KanbanColumnDef,
+} from "@/components/kanban-board";
 import { createClient } from "@/lib/supabase/server";
 import {
   supportStatusLabels,
@@ -8,13 +14,36 @@ import {
   invoiceStatusLabels,
   invoiceStatusTones,
 } from "@/lib/types";
+import { updateSupportStatus } from "./actions";
 
-export default async function SupportPage() {
+const SUPPORT_COLUMNS: KanbanColumnDef[] = (
+  Object.keys(supportStatusLabels) as (keyof typeof supportStatusLabels)[]
+).map((value) => ({ value, label: supportStatusLabels[value] }));
+
+export default async function SupportPage({
+  searchParams,
+}: {
+  searchParams: { view?: string };
+}) {
+  const view = searchParams.view === "board" ? "board" : "list";
   const supabase = createClient();
   const { data: cases } = await supabase
     .from("support_cases")
     .select("*, customer:customers(name)")
     .order("opened_at", { ascending: false });
+
+  const cards: KanbanCard[] = (cases ?? []).map((s: any) => ({
+    id: s.id,
+    title: s.title,
+    subtitle: s.customer?.name ?? null,
+    meta: s.hours_spent
+      ? `${s.hours_spent} timer brugt`
+      : s.opened_at
+        ? `Åbnet ${s.opened_at}`
+        : null,
+    metaTone: null,
+    status: s.status,
+  }));
 
   return (
     <>
@@ -28,80 +57,93 @@ export default async function SupportPage() {
             Supportsager, solgt separat fra vedligeholdelse.
           </p>
         </div>
-        <Link href="/support/ny" className="btn-primary gap-1.5">
-          <Plus className="h-4 w-4" />
-          Ny sag
-        </Link>
+        <div className="flex items-center gap-2">
+          <ViewToggle base="/support" view={view} />
+          <Link href="/support/ny" className="btn-primary gap-1.5">
+            <Plus className="h-4 w-4" />
+            Ny sag
+          </Link>
+        </div>
       </div>
-      <div className="card overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
-            <tr>
-              <th className="px-5 py-3">Sag</th>
-              <th className="px-5 py-3">Kunde</th>
-              <th className="px-5 py-3">Timer</th>
-              <th className="px-5 py-3">Faktura</th>
-              <th className="px-5 py-3">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(cases ?? []).map((s: any) => (
-              <tr
-                key={s.id}
-                className="border-t border-line/70 hover:bg-ink/[0.02]"
-              >
-                <td className="px-5 py-3">
-                  <Link
-                    href={`/support/${s.id}`}
-                    className="font-medium text-ink hover:underline"
-                  >
-                    {s.title}
-                  </Link>
-                </td>
-                <td className="px-5 py-3 text-ink/65">
-                  {s.customer?.name ?? "–"}
-                </td>
-                <td className="px-5 py-3 text-ink/65">
-                  {s.hours_spent ?? "–"}
-                </td>
-                <td className="px-5 py-3">
-                  <StatusBadge
-                    tone={
-                      invoiceStatusTones[
-                        s.invoice_status as keyof typeof invoiceStatusTones
-                      ]
-                    }
-                  >
-                    {invoiceStatusLabels[
-                      s.invoice_status as keyof typeof invoiceStatusLabels
-                    ] ?? s.invoice_status}
-                  </StatusBadge>
-                </td>
-                <td className="px-5 py-3">
-                  <StatusBadge
-                    tone={
-                      supportStatusTones[
-                        s.status as keyof typeof supportStatusTones
-                      ]
-                    }
-                  >
-                    {supportStatusLabels[
-                      s.status as keyof typeof supportStatusLabels
-                    ] ?? s.status}
-                  </StatusBadge>
-                </td>
-              </tr>
-            ))}
-            {(cases ?? []).length === 0 && (
+
+      {view === "board" ? (
+        <KanbanBoard
+          cards={cards}
+          columns={SUPPORT_COLUMNS}
+          hrefPrefix="/support"
+          onStatusChange={updateSupportStatus}
+        />
+      ) : (
+        <div className="card overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
               <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
-                  Ingen supportsager endnu.
-                </td>
+                <th className="px-5 py-3">Sag</th>
+                <th className="px-5 py-3">Kunde</th>
+                <th className="px-5 py-3">Timer</th>
+                <th className="px-5 py-3">Faktura</th>
+                <th className="px-5 py-3">Status</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {(cases ?? []).map((s: any) => (
+                <tr
+                  key={s.id}
+                  className="border-t border-line/70 hover:bg-ink/[0.02]"
+                >
+                  <td className="px-5 py-3">
+                    <Link
+                      href={`/support/${s.id}`}
+                      className="font-medium text-ink hover:underline"
+                    >
+                      {s.title}
+                    </Link>
+                  </td>
+                  <td className="px-5 py-3 text-ink/65">
+                    {s.customer?.name ?? "–"}
+                  </td>
+                  <td className="px-5 py-3 text-ink/65">
+                    {s.hours_spent ?? "–"}
+                  </td>
+                  <td className="px-5 py-3">
+                    <StatusBadge
+                      tone={
+                        invoiceStatusTones[
+                          s.invoice_status as keyof typeof invoiceStatusTones
+                        ]
+                      }
+                    >
+                      {invoiceStatusLabels[
+                        s.invoice_status as keyof typeof invoiceStatusLabels
+                      ] ?? s.invoice_status}
+                    </StatusBadge>
+                  </td>
+                  <td className="px-5 py-3">
+                    <StatusBadge
+                      tone={
+                        supportStatusTones[
+                          s.status as keyof typeof supportStatusTones
+                        ]
+                      }
+                    >
+                      {supportStatusLabels[
+                        s.status as keyof typeof supportStatusLabels
+                      ] ?? s.status}
+                    </StatusBadge>
+                  </td>
+                </tr>
+              ))}
+              {(cases ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
+                    Ingen supportsager endnu.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </>
   );
 }

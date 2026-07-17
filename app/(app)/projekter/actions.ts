@@ -49,3 +49,14 @@ export async function deleteProject(id: string, _formData: FormData) {
   revalidatePath("/projekter");
   redirect("/projekter");
 }
+
+export async function updateProjectStatus(id: string, status: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("projects")
+    .update({ status })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/projekter");
+  revalidatePath(`/projekter/${id}`);
+}

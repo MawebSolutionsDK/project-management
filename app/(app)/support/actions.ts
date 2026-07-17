@@ -62,3 +62,14 @@ export async function deleteSupportCase(id: string, _formData: FormData) {
   revalidatePath("/support");
   redirect("/support");
 }
+
+export async function updateSupportStatus(id: string, status: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("support_cases")
+    .update({ status })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/support");
+  revalidatePath(`/support/${id}`);
+}

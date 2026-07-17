@@ -47,3 +47,14 @@ export async function deleteLead(id: string, _formData: FormData) {
   revalidatePath("/leads");
   redirect("/leads");
 }
+
+export async function updateLeadStatus(id: string, status: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("leads")
+    .update({ status })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${id}`);
+}
