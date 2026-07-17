@@ -11,10 +11,15 @@ import {
   Mail,
 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import {
+  MrrGrowthChart,
+  LeadsPerWeekChart,
+} from "@/components/dashboard-charts";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
 import { buildPeriodSummaries, type PeriodStats } from "@/lib/summary";
 import { buildActiveNotifications } from "@/lib/notifications";
+import { buildMrrGrowth, buildNewLeadsPerWeek } from "@/lib/charts";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -39,6 +44,8 @@ export default async function DashboardPage() {
     recentCustomersRes,
     recentLeadsRes,
     recentProjectsRes,
+    mrrGrowthData,
+    leadsPerWeekData,
   ] = await Promise.all([
     supabase
       .from("customers")
@@ -83,6 +90,8 @@ export default async function DashboardPage() {
       .select("id, name, created_at")
       .order("created_at", { ascending: false })
       .limit(5),
+    buildMrrGrowth(supabase),
+    buildNewLeadsPerWeek(supabase),
   ]);
 
   const activeAgreements = activeAgreementsRes.data ?? [];
@@ -97,36 +106,51 @@ export default async function DashboardPage() {
       label: "Kunder",
       value: customersRes.count ?? 0,
       icon: Users,
+      trend:
+        summaries.week.newCustomers > 0
+          ? `+${summaries.week.newCustomers} denne uge`
+          : null,
     },
     {
       href: "/leads",
       label: "Åbne leads",
       value: leadsCountRes.count ?? 0,
       icon: Target,
+      trend:
+        summaries.week.newLeads > 0
+          ? `+${summaries.week.newLeads} denne uge`
+          : null,
     },
     {
       href: "/projekter",
       label: "Aktive projekter",
       value: projectsCountRes.count ?? 0,
       icon: Briefcase,
+      trend:
+        summaries.week.newProjects > 0
+          ? `+${summaries.week.newProjects} denne uge`
+          : null,
     },
     {
       href: "/vedligeholdelse",
       label: "MRR",
       value: `${mrr.toLocaleString("da-DK")} kr.`,
       icon: Wallet,
+      trend: null,
     },
     {
       href: "/support",
       label: "Åbne supportsager",
       value: openSupportRes.count ?? 0,
       icon: LifeBuoy,
+      trend: null,
     },
     {
       href: "/mails?filter=unread",
       label: "Ulæste kunde-mails",
       value: unreadMailRes.count ?? 0,
       icon: Mail,
+      trend: null,
     },
   ];
 
@@ -177,9 +201,39 @@ export default async function DashboardPage() {
               <Icon className="h-5 w-5 text-accent" />
               <p className="mt-3 text-sm text-ink/55">{c.label}</p>
               <p className="mt-1 text-2xl font-semibold text-ink">{c.value}</p>
+              {c.trend && (
+                <p className="mt-1.5 text-xs font-medium text-accent">
+                  {c.trend}
+                </p>
+              )}
             </Link>
           );
         })}
+      </div>
+
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">
+        Grafer
+      </h2>
+      <div className="mt-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="card p-5">
+          <h2 className="text-sm font-semibold text-ink/75">MRR-tilvækst</h2>
+          <p className="mt-0.5 text-xs text-ink/40">
+            Kumuleret pris for aktive aftaler, efter deres startdato. Viser ikke
+            opsigelser.
+          </p>
+          <div className="mt-3">
+            <MrrGrowthChart data={mrrGrowthData} />
+          </div>
+        </div>
+        <div className="card p-5">
+          <h2 className="text-sm font-semibold text-ink/75">
+            Nye leads pr. uge
+          </h2>
+          <p className="mt-0.5 text-xs text-ink/40">Seneste 8 uger.</p>
+          <div className="mt-3">
+            <LeadsPerWeekChart data={leadsPerWeekData} />
+          </div>
+        </div>
       </div>
 
       <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">
