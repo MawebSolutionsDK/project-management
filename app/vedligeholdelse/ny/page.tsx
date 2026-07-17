@@ -2,17 +2,24 @@ import { Save } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { BackLink } from "@/components/back-link";
 import { Field } from "@/components/form-field";
+import { ProductPriceField } from "@/components/product-price-field";
 import { createClient } from "@/lib/supabase/server";
 import { createAgreement } from "../actions";
 
 export default async function NyAftalePage({ searchParams }: { searchParams: { customer_id?: string } }) {
   const supabase = createClient();
   const { data: customers } = await supabase.from("customers").select("id, name").order("name");
+  const { data: products } = await supabase
+    .from("products")
+    .select("id, name, default_price")
+    .eq("is_active", true)
+    .order("name");
 
   return (
     <>
       <AppNav current="/vedligeholdelse" />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mx-auto max-w-2xl">
         <BackLink href="/vedligeholdelse" label="Tilbage til aftaler" />
         <h1 className="mb-6 text-2xl font-semibold text-ink">Ny vedligeholdelsesaftale</h1>
         <form action={createAgreement} className="card space-y-4 p-6">
@@ -30,16 +37,19 @@ export default async function NyAftalePage({ searchParams }: { searchParams: { c
             </select>
           </div>
           <Field label="Plan" name="plan_name" placeholder="fx Standard hosting + vedligeholdelse" required />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Pris pr. måned (DKK)" name="monthly_price" type="number" required />
-            <div>
-              <label className="label">Aftaleperiode</label>
-              <select name="period_years" defaultValue="1" className="input">
-                <option value="1">1 år</option>
-                <option value="2">2 år</option>
-                <option value="3">3 år</option>
-              </select>
-            </div>
+          <ProductPriceField
+            products={products ?? []}
+            productFieldName="product_id"
+            priceFieldName="monthly_price"
+            priceLabel="Pris pr. måned (DKK)"
+          />
+          <div>
+            <label className="label">Aftaleperiode</label>
+            <select name="period_years" defaultValue="1" className="input">
+              <option value="1">1 år</option>
+              <option value="2">2 år</option>
+              <option value="3">3 år</option>
+            </select>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Startdato" name="start_date" type="date" required />
@@ -61,6 +71,7 @@ export default async function NyAftalePage({ searchParams }: { searchParams: { c
             Gem
           </button>
         </form>
+         </div>
       </main>
     </>
   );

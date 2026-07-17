@@ -189,3 +189,22 @@ export const supportStatusTones: Record<SupportStatus, BadgeTone> = {
   aaben: "warning",
   loest: "success",
 };
+
+export type PricingType = "engangsbeloeb" | "maanedlig";
+
+export interface Product {
+  id: string;
+  name: string;
+  category: string | null;
+  pricing_type: PricingType;
+  default_price: number;
+  description: string | null;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+}
+
+export const pricingTypeLabels: Record<PricingType, string> = {
+  engangsbeloeb: "Engangsbeløb",
+  maanedlig: "Månedligt",
+};

@@ -8,7 +8,8 @@ export default function NyKundePage() {
   return (
     <>
       <AppNav current="/kunder" />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mx-auto max-w-2xl">
         <BackLink href="/kunder" label="Tilbage til kunder" />
         <h1 className="mb-6 text-2xl font-semibold text-ink">Ny kunde</h1>
         <form action={createCustomer} className="card space-y-4 p-6">
@@ -44,6 +45,7 @@ export default function NyKundePage() {
             Gem
           </button>
         </form>
+         </div>
       </main>
     </>
   );

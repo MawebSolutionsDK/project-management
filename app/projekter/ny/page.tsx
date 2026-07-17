@@ -2,6 +2,7 @@ import { Save } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { BackLink } from "@/components/back-link";
 import { Field } from "@/components/form-field";
+import { ProductPriceField } from "@/components/product-price-field";
 import { createClient } from "@/lib/supabase/server";
 import { createProject } from "../actions";
 
@@ -12,11 +13,17 @@ export default async function NytProjektPage({
 }) {
   const supabase = createClient();
   const { data: customers } = await supabase.from("customers").select("id, name").order("name");
+  const { data: products } = await supabase
+    .from("products")
+    .select("id, name, default_price")
+    .eq("is_active", true)
+    .order("name");
 
   return (
     <>
       <AppNav current="/projekter" />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mx-auto max-w-2xl">
         <BackLink href="/projekter" label="Tilbage til projekter" />
         <h1 className="mb-6 text-2xl font-semibold text-ink">Nyt projekt</h1>
         <form action={createProject} className="card space-y-4 p-6">
@@ -58,16 +65,20 @@ export default async function NytProjektPage({
             <label className="label">Scope (kort, konkret)</label>
             <textarea name="scope_description" rows={3} className="input" />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Pris (DKK)" name="price" type="number" />
-            <div>
-              <label className="label">Fakturastatus</label>
-              <select name="invoice_status" defaultValue="ikke_faktureret" className="input">
-                <option value="ikke_faktureret">Ikke faktureret</option>
-                <option value="faktureret">Faktureret</option>
-                <option value="betalt">Betalt</option>
-              </select>
-            </div>
+          <ProductPriceField
+            products={products ?? []}
+            productFieldName="product_id"
+            priceFieldName="price"
+            priceLabel="Pris (DKK)"
+            required={false}
+          />
+          <div>
+            <label className="label">Fakturastatus</label>
+            <select name="invoice_status" defaultValue="ikke_faktureret" className="input">
+              <option value="ikke_faktureret">Ikke faktureret</option>
+              <option value="faktureret">Faktureret</option>
+              <option value="betalt">Betalt</option>
+            </select>
           </div>
           <Field label="Links" name="links" placeholder="fx staging-site, filer" />
           <div>
@@ -79,6 +90,7 @@ export default async function NytProjektPage({
             Gem
           </button>
         </form>
+         </div>
       </main>
     </>
   );

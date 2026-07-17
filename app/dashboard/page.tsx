@@ -179,10 +179,12 @@ export default async function DashboardPage() {
   return (
     <>
       <AppNav current="/dashboard" />
-      <main className="mx-auto max-w-4xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
         <h1 className="text-2xl font-semibold text-ink">Velkommen, {user?.email}</h1>
         <p className="mt-1 text-sm text-ink/55">Overblik over kunder, leads, projekter og drift.</p>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+
+        <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">Nøgletal</h2>
+        <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {cards.map((c) => {
             const Icon = c.icon;
             return (
@@ -195,7 +197,8 @@ export default async function DashboardPage() {
           })}
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">Periode-oversigt</h2>
+        <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
           {(
             [
               { key: "day", label: "I dag" },
@@ -230,7 +233,8 @@ export default async function DashboardPage() {
           })}
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">Kræver din opmærksomhed</h2>
+        <div className="mt-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="card p-5">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-ink/75">
               <Bell className="h-4 w-4 text-accent" />

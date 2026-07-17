@@ -8,7 +8,8 @@ export default function NyUdgiftPage() {
   return (
     <>
       <AppNav current="/udgifter" />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mx-auto max-w-2xl">
         <BackLink href="/udgifter" label="Tilbage til udgifter" />
         <h1 className="mb-6 text-2xl font-semibold text-ink">Ny udgift</h1>
         <form action={createExpense} className="card space-y-4 p-6">
@@ -36,6 +37,7 @@ export default function NyUdgiftPage() {
             Gem
           </button>
         </form>
+         </div>
       </main>
     </>
   );

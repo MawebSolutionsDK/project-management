@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 function fields(formData: FormData) {
   return {
     customer_id: formData.get("customer_id") as string,
+    product_id: (formData.get("product_id") as string) || null,
     plan_name: formData.get("plan_name") as string,
     monthly_price: Number(formData.get("monthly_price") || 0),
     period_years: Number(formData.get("period_years") || 1),

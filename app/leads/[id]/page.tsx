@@ -24,7 +24,8 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
   return (
     <>
       <AppNav current="/leads" />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mx-auto max-w-2xl">
         <BackLink href="/leads" label="Tilbage til leads" />
         <h1 className="mb-6 text-2xl font-semibold text-ink">{lead.name}</h1>
         <form action={updateWithId} className="card space-y-4 p-6">
@@ -89,6 +90,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
             , hvis det ikke allerede er gjort.
           </p>
         )}
+         </div>
       </main>
     </>
   );

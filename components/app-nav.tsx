@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, Target, Briefcase, RefreshCw, LifeBuoy, Receipt, Mail } from "lucide-react";
+import { LayoutDashboard, Users, Target, Briefcase, RefreshCw, LifeBuoy, Receipt, Mail, Package } from "lucide-react";
 import SignOutButton from "./sign-out-button";
 
 const links = [
@@ -7,6 +7,7 @@ const links = [
   { href: "/kunder", label: "Kunder", icon: Users },
   { href: "/leads", label: "Leads", icon: Target },
   { href: "/projekter", label: "Projekter", icon: Briefcase },
+  { href: "/produkter", label: "Produkter", icon: Package },
   { href: "/vedligeholdelse", label: "Aftaler", icon: RefreshCw },
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/udgifter", label: "Udgifter", icon: Receipt },

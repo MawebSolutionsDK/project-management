@@ -14,7 +14,7 @@ export default async function UdgifterPage() {
   return (
     <>
       <AppNav current="/udgifter" />
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-semibold text-ink">

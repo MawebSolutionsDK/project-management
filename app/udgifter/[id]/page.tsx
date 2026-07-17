@@ -18,7 +18,8 @@ export default async function UdgiftDetailPage({ params }: { params: { id: strin
   return (
     <>
       <AppNav current="/udgifter" />
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mx-auto max-w-2xl">
         <BackLink href="/udgifter" label="Tilbage til udgifter" />
         <h1 className="mb-1 text-2xl font-semibold text-ink">{expense.name}</h1>
         <p className="mb-6 text-sm text-ink/55">Omregnet: {annualizedCost(expense).toLocaleString("da-DK")} kr./år</p>
@@ -54,6 +55,7 @@ export default async function UdgiftDetailPage({ params }: { params: { id: strin
             Slet udgift
           </button>
         </form>
+         </div>
       </main>
     </>
   );

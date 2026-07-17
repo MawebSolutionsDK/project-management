@@ -8,6 +8,7 @@ function fields(formData: FormData) {
   const priceRaw = formData.get("price") as string;
   return {
     customer_id: formData.get("customer_id") as string,
+    product_id: (formData.get("product_id") as string) || null,
     name: formData.get("name") as string,
     type: (formData.get("type") as string) || null,
     status: (formData.get("status") as string) || "forespoergsel",
