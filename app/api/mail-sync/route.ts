@@ -127,19 +127,18 @@ async function syncMailbox(supabase: ReturnType<typeof createServiceClient>, con
       lock.release();
     }
   } catch (err) {
-    const anyErr = err as {
-      message?: string;
-      responseText?: string;
-      response?: string;
-      code?: string;
-      authenticationFailed?: boolean;
-    };
-    const parts = [anyErr?.message ?? String(err)];
-    if (anyErr?.code) parts.push(`code=${anyErr.code}`);
-    if (anyErr?.authenticationFailed) parts.push("authenticationFailed=true");
-    if (anyErr?.responseText) parts.push(`responseText=${anyErr.responseText}`);
-    if (anyErr?.response) parts.push(`response=${anyErr.response}`);
-    result.error = parts.join(" | ");
+    try {
+      const plain: Record<string, unknown> = {};
+      for (const key of Object.getOwnPropertyNames(err as object)) {
+        const value = (err as Record<string, unknown>)[key];
+        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+          plain[key] = value;
+        }
+      }
+      result.error = JSON.stringify(plain);
+    } catch {
+      result.error = err instanceof Error ? err.message : String(err);
+    }
   } finally {
     try {
       await client.logout();
