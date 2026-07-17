@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
+import { MobileTopbar } from "@/components/mobile-topbar";
 import { CommandPalette } from "@/components/command-palette";
 import { createClient } from "@/lib/supabase/server";
 import { buildActiveNotifications } from "@/lib/notifications";
@@ -22,8 +23,9 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen">
+      <MobileTopbar />
       <Sidebar notificationCount={notifications.length} />
-      <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 pb-8 pt-20 sm:px-6 md:pb-10 md:pt-10">
         {children}
       </main>
       <CommandPalette />

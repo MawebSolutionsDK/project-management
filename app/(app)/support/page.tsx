@@ -51,7 +51,7 @@ export default async function SupportPage({
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-ink">
             <LifeBuoy className="h-6 w-6 text-accent" />
@@ -61,7 +61,7 @@ export default async function SupportPage({
             Supportsager, solgt separat fra vedligeholdelse.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <ViewToggle base="/support" view={view} />
           <Link href="/support/ny" className="btn-primary gap-1.5">
             <Plus className="h-4 w-4" />
@@ -84,7 +84,7 @@ export default async function SupportPage({
           onStatusChange={updateSupportStatus}
         />
       ) : (
-        <div className="card overflow-hidden">
+        <div className="card overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
               <tr>

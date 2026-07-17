@@ -79,7 +79,7 @@ export default async function MailsPage({
         </form>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="card overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
             <tr>
