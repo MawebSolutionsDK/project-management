@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Plus, Target, AlertTriangle } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { Avatar } from "@/components/avatar";
+import { TableSearch } from "@/components/table-search";
+import { RowActions } from "@/components/row-actions";
 import { ViewToggle } from "@/components/view-toggle";
 import {
   KanbanBoard,
@@ -10,7 +13,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { leadStatusLabels, leadStatusTones } from "@/lib/types";
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
-import { updateLeadStatus } from "./actions";
+import { deleteLead, updateLeadStatus } from "./actions";
 
 const LEAD_COLUMNS: KanbanColumnDef[] = (
   Object.keys(leadStatusLabels) as (keyof typeof leadStatusLabels)[]
@@ -70,6 +73,12 @@ export default async function LeadsPage({
         </div>
       </div>
 
+      {view === "list" && (
+        <div className="mb-3">
+          <TableSearch placeholder="Søg leads..." />
+        </div>
+      )}
+
       {view === "board" ? (
         <KanbanBoard
           cards={cards}
@@ -86,6 +95,7 @@ export default async function LeadsPage({
                 <th className="px-5 py-3">Kilde</th>
                 <th className="px-5 py-3">Status</th>
                 <th className="px-5 py-3">Næste handling</th>
+                <th className="px-5 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -98,20 +108,26 @@ export default async function LeadsPage({
                 return (
                   <tr
                     key={l.id}
-                    className="border-t border-line/70 hover:bg-ink/[0.02]"
+                    data-search-row={`${l.name} ${l.source ?? ""} ${l.customer?.name ?? ""}`}
+                    className="group border-t border-line/70 hover:bg-ink/[0.02]"
                   >
                     <td className="px-5 py-3">
-                      <Link
-                        href={`/leads/${l.id}`}
-                        className="font-medium text-ink hover:underline"
-                      >
-                        {l.name}
-                      </Link>
-                      {l.customer?.name && (
-                        <span className="ml-2 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">
-                          {l.customer.name}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-3">
+                        <Avatar name={l.name} size="sm" />
+                        <div>
+                          <Link
+                            href={`/leads/${l.id}`}
+                            className="font-medium text-ink hover:underline"
+                          >
+                            {l.name}
+                          </Link>
+                          {l.customer?.name && (
+                            <span className="ml-2 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">
+                              {l.customer.name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-5 py-3 text-ink/65">{l.source ?? "–"}</td>
                     <td className="px-5 py-3">
@@ -140,12 +156,18 @@ export default async function LeadsPage({
                         <span className="text-ink/65">–</span>
                       )}
                     </td>
+                    <td className="px-5 py-3">
+                      <RowActions
+                        editHref={`/leads/${l.id}`}
+                        deleteAction={deleteLead.bind(null, l.id)}
+                      />
+                    </td>
                   </tr>
                 );
               })}
               {(leads ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-8 text-center text-ink/40">
+                  <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
                     Ingen leads endnu.
                   </td>
                 </tr>

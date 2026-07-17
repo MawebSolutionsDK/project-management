@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { Plus, Users, Download } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { Avatar } from "@/components/avatar";
+import { TableSearch } from "@/components/table-search";
+import { RowActions } from "@/components/row-actions";
 import { createClient } from "@/lib/supabase/server";
 import { customerStatusLabels, customerStatusTones } from "@/lib/types";
+import { deleteCustomer } from "./actions";
 
 export default async function KunderPage() {
   const supabase = createClient();
@@ -34,6 +38,11 @@ export default async function KunderPage() {
           </Link>
         </div>
       </div>
+
+      <div className="mb-3">
+        <TableSearch placeholder="Søg kunder..." />
+      </div>
+
       <div className="card overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
@@ -42,26 +51,33 @@ export default async function KunderPage() {
               <th className="px-5 py-3">Branche</th>
               <th className="px-5 py-3">Kontakt</th>
               <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3" />
             </tr>
           </thead>
           <tbody>
             {(customers ?? []).map((c) => (
               <tr
                 key={c.id}
-                className="border-t border-line/70 hover:bg-ink/[0.02]"
+                data-search-row={`${c.name} ${c.industry ?? ""} ${c.contact_person ?? ""} ${c.email ?? ""}`}
+                className="group border-t border-line/70 hover:bg-ink/[0.02]"
               >
                 <td className="px-5 py-3">
-                  <Link
-                    href={`/kunder/${c.id}`}
-                    className="font-medium text-ink hover:underline"
-                  >
-                    {c.name}
-                  </Link>
-                  {c.is_internal && (
-                    <span className="ml-2 rounded-full bg-ink/[0.06] px-2 py-0.5 text-xs font-medium text-ink/60">
-                      Internt
-                    </span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <Avatar name={c.name} size="sm" />
+                    <div>
+                      <Link
+                        href={`/kunder/${c.id}`}
+                        className="font-medium text-ink hover:underline"
+                      >
+                        {c.name}
+                      </Link>
+                      {c.is_internal && (
+                        <span className="ml-2 rounded-full bg-ink/[0.06] px-2 py-0.5 text-xs font-medium text-ink/60">
+                          Internt
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-5 py-3 text-ink/65">{c.industry ?? "–"}</td>
                 <td className="px-5 py-3 text-ink/65">
@@ -80,11 +96,17 @@ export default async function KunderPage() {
                     ] ?? c.status}
                   </StatusBadge>
                 </td>
+                <td className="px-5 py-3">
+                  <RowActions
+                    editHref={`/kunder/${c.id}`}
+                    deleteAction={deleteCustomer.bind(null, c.id)}
+                  />
+                </td>
               </tr>
             ))}
             {(customers ?? []).length === 0 && (
               <tr>
-                <td colSpan={4} className="px-5 py-8 text-center text-ink/40">
+                <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
                   Ingen kunder endnu.
                 </td>
               </tr>

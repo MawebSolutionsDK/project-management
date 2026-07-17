@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { Plus, RefreshCw } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { Avatar } from "@/components/avatar";
+import { TableSearch } from "@/components/table-search";
+import { RowActions } from "@/components/row-actions";
 import { createClient } from "@/lib/supabase/server";
 import { agreementStatusLabels, agreementStatusTones } from "@/lib/types";
+import { deleteAgreement } from "./actions";
 
 export default async function VedligeholdelsePage() {
   const supabase = createClient();
@@ -28,6 +32,11 @@ export default async function VedligeholdelsePage() {
           Ny aftale
         </Link>
       </div>
+
+      <div className="mb-3">
+        <TableSearch placeholder="Søg aftaler..." />
+      </div>
+
       <div className="card overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
@@ -37,21 +46,26 @@ export default async function VedligeholdelsePage() {
               <th className="px-5 py-3">Pris/md</th>
               <th className="px-5 py-3">Fornyes</th>
               <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3" />
             </tr>
           </thead>
           <tbody>
             {(agreements ?? []).map((a: any) => (
               <tr
                 key={a.id}
-                className="border-t border-line/70 hover:bg-ink/[0.02]"
+                data-search-row={`${a.customer?.name ?? ""} ${a.plan_name}`}
+                className="group border-t border-line/70 hover:bg-ink/[0.02]"
               >
                 <td className="px-5 py-3">
-                  <Link
-                    href={`/vedligeholdelse/${a.id}`}
-                    className="font-medium text-ink hover:underline"
-                  >
-                    {a.customer?.name ?? "–"}
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    <Avatar name={a.customer?.name ?? "?"} size="sm" />
+                    <Link
+                      href={`/vedligeholdelse/${a.id}`}
+                      className="font-medium text-ink hover:underline"
+                    >
+                      {a.customer?.name ?? "–"}
+                    </Link>
+                  </div>
                 </td>
                 <td className="px-5 py-3 text-ink/65">{a.plan_name}</td>
                 <td className="px-5 py-3 text-ink/65">
@@ -71,11 +85,17 @@ export default async function VedligeholdelsePage() {
                     ] ?? a.status}
                   </StatusBadge>
                 </td>
+                <td className="px-5 py-3">
+                  <RowActions
+                    editHref={`/vedligeholdelse/${a.id}`}
+                    deleteAction={deleteAgreement.bind(null, a.id)}
+                  />
+                </td>
               </tr>
             ))}
             {(agreements ?? []).length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
+                <td colSpan={6} className="px-5 py-8 text-center text-ink/40">
                   Ingen aftaler endnu.
                 </td>
               </tr>

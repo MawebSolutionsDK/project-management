@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Plus, Receipt } from "lucide-react";
+import { TableSearch } from "@/components/table-search";
+import { RowActions } from "@/components/row-actions";
 import { createClient } from "@/lib/supabase/server";
 import { billingFrequencyLabels, annualizedCost } from "@/lib/types";
+import { deleteExpense } from "./actions";
 
 export default async function UdgifterPage() {
   const supabase = createClient();
@@ -31,6 +34,11 @@ export default async function UdgifterPage() {
           Ny udgift
         </Link>
       </div>
+
+      <div className="mb-3">
+        <TableSearch placeholder="Søg udgifter..." />
+      </div>
+
       <div className="card overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead className="bg-ink/[0.03] text-xs uppercase tracking-wide text-ink/45">
@@ -40,13 +48,15 @@ export default async function UdgifterPage() {
               <th className="px-5 py-3">Pris</th>
               <th className="px-5 py-3">Omregnet årligt</th>
               <th className="px-5 py-3">Fornyes</th>
+              <th className="px-5 py-3" />
             </tr>
           </thead>
           <tbody>
             {rows.map((e) => (
               <tr
                 key={e.id}
-                className="border-t border-line/70 hover:bg-ink/[0.02]"
+                data-search-row={`${e.name} ${e.category ?? ""}`}
+                className="group border-t border-line/70 hover:bg-ink/[0.02]"
               >
                 <td className="px-5 py-3">
                   <Link
@@ -69,11 +79,17 @@ export default async function UdgifterPage() {
                 <td className="px-5 py-3 text-ink/65">
                   {e.renewal_date ?? "–"}
                 </td>
+                <td className="px-5 py-3">
+                  <RowActions
+                    editHref={`/udgifter/${e.id}`}
+                    deleteAction={deleteExpense.bind(null, e.id)}
+                  />
+                </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
+                <td colSpan={6} className="px-5 py-8 text-center text-ink/40">
                   Ingen udgifter registreret endnu.
                 </td>
               </tr>
