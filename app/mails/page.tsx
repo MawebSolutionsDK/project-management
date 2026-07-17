@@ -3,7 +3,7 @@ import { Mail, CheckCircle2, Circle, Wrench, Trash2 } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { EmailMatchSelect } from "@/components/email-match-select";
 import { createClient } from "@/lib/supabase/server";
-import { toggleRead, toggleActioned, setMatchedCustomer, deleteEmailAction } from "./actions";
+import { toggleRead, toggleActioned, setMatchedCustomer, deleteEmailAction, rematchUnmatchedEmails } from "./actions";
 
 export default async function MailsPage({ searchParams }: { searchParams: { filter?: string } }) {
   const filter = searchParams.filter ?? "unread";
@@ -41,20 +41,31 @@ export default async function MailsPage({ searchParams }: { searchParams: { filt
           </p>
         </div>
 
-        <div className="mb-4 flex gap-1">
-          {tabs.map((t) => (
-            <Link
-              key={t.key}
-              href={`/mails?filter=${t.key}`}
-              className={
-                filter === t.key
-                  ? "rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-canvas"
-                  : "rounded-full px-3 py-1.5 text-sm font-medium text-ink/55 transition hover:bg-ink/[0.06] hover:text-ink"
-              }
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex gap-1">
+            {tabs.map((t) => (
+              <Link
+                key={t.key}
+                href={`/mails?filter=${t.key}`}
+                className={
+                  filter === t.key
+                    ? "rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-canvas"
+                    : "rounded-full px-3 py-1.5 text-sm font-medium text-ink/55 transition hover:bg-ink/[0.06] hover:text-ink"
+                }
+              >
+                {t.label}
+              </Link>
+            ))}
+          </div>
+          <form action={rematchUnmatchedEmails}>
+            <button
+              type="submit"
+              className="link-muted text-xs"
+              title="Kør nuværende matching-regler igen på mails uden kunde/lead-match"
             >
-              {t.label}
-            </Link>
-          ))}
+              Prøv match igen
+            </button>
+          </form>
         </div>
 
         <div className="card overflow-hidden">
@@ -95,7 +106,10 @@ export default async function MailsPage({ searchParams }: { searchParams: { filt
 
                 return (
                   <tr key={e.id} className={`border-t border-line/70 hover:bg-ink/[0.02] ${!e.is_read ? "font-medium" : ""}`}>
-                    <td className="px-5 py-3 text-ink/80">{e.from_name || e.from_address || "Ukendt"}</td>
+                    <td className="px-5 py-3 text-ink/80">
+                      <div>{e.from_name || "Ukendt afsender"}</div>
+                      {e.from_address && <div className="text-xs font-normal text-ink/45">{e.from_address}</div>}
+                    </td>
                     <td className="px-5 py-3 text-ink/80">
                       <div>{e.subject || "(intet emne)"}</div>
                       {e.preview && (

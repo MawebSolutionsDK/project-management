@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ImapFlow, type FetchMessageObject } from "imapflow";
 import { simpleParser } from "mailparser";
 import { createServiceClient } from "@/lib/supabase/service";
+import { findMatch } from "@/lib/mail-matching";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -13,23 +14,6 @@ interface MailboxConfig {
   imapUser: string;
   imapPassword: string;
 }
-
-// Almindelige gratis mail-udbydere - domænematch her ville give falske positiver
-// (mange forskellige kunder/leads kan sagtens dele "gmail.com" osv).
-const FREEMAIL_DOMAINS = new Set([
-  "gmail.com",
-  "googlemail.com",
-  "hotmail.com",
-  "outlook.com",
-  "live.com",
-  "yahoo.com",
-  "yahoo.co.uk",
-  "icloud.com",
-  "me.com",
-  "msn.com",
-  "aol.com",
-  "protonmail.com",
-]);
 
 // Add sales@ / info@ here later, each backed by its own *_IMAP_PASSWORD env var.
 function getConfiguredMailboxes(): MailboxConfig[] {
@@ -43,17 +27,6 @@ function getConfiguredMailboxes(): MailboxConfig[] {
       : null,
   ];
   return configs.filter((c): c is MailboxConfig => c !== null);
-}
-
-async function findMatchByAddress(supabase: ServiceClient, table: "customers" | "leads", email: string) {
-  const { data } = await supabase.from(table).select("id").ilike("email", email).limit(1);
-  return data && data.length > 0 ? data[0].id : null;
-}
-
-async function findMatchByDomain(supabase: ServiceClient, table: "customers" | "leads", domain: string) {
-  if (FREEMAIL_DOMAINS.has(domain)) return null;
-  const { data } = await supabase.from(table).select("id").ilike("email", `%@${domain}`).limit(1);
-  return data && data.length > 0 ? data[0].id : null;
 }
 
 // Henter et kort tekstuddrag af mailens brødtekst, så en supportsag kan oprettes
@@ -72,26 +45,6 @@ async function fetchPreview(client: ImapFlow, uid: number): Promise<string | nul
   } catch {
     return null;
   }
-}
-
-async function findMatch(supabase: ServiceClient, fromAddress: string) {
-  let matchedCustomerId = await findMatchByAddress(supabase, "customers", fromAddress);
-  let matchedLeadId: string | null = null;
-  if (!matchedCustomerId) {
-    matchedLeadId = await findMatchByAddress(supabase, "leads", fromAddress);
-  }
-
-  if (!matchedCustomerId && !matchedLeadId) {
-    const domain = fromAddress.split("@")[1];
-    if (domain) {
-      matchedCustomerId = await findMatchByDomain(supabase, "customers", domain);
-      if (!matchedCustomerId) {
-        matchedLeadId = await findMatchByDomain(supabase, "leads", domain);
-      }
-    }
-  }
-
-  return { matchedCustomerId, matchedLeadId };
 }
 
 async function importMessage(
