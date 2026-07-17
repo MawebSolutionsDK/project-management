@@ -127,7 +127,19 @@ async function syncMailbox(supabase: ReturnType<typeof createServiceClient>, con
       lock.release();
     }
   } catch (err) {
-    result.error = err instanceof Error ? err.message : String(err);
+    const anyErr = err as {
+      message?: string;
+      responseText?: string;
+      response?: string;
+      code?: string;
+      authenticationFailed?: boolean;
+    };
+    const parts = [anyErr?.message ?? String(err)];
+    if (anyErr?.code) parts.push(`code=${anyErr.code}`);
+    if (anyErr?.authenticationFailed) parts.push("authenticationFailed=true");
+    if (anyErr?.responseText) parts.push(`responseText=${anyErr.responseText}`);
+    if (anyErr?.response) parts.push(`response=${anyErr.response}`);
+    result.error = parts.join(" | ");
   } finally {
     try {
       await client.logout();
