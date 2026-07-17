@@ -71,12 +71,17 @@ export function Sidebar({
       }`}
     >
       <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-4">
-        {!collapsed && (
-          <span className="truncate text-sm font-semibold tracking-tight text-ink">
-            Maweb Solutions
-            <span className="ml-1.5 font-normal text-ink/40">· system</span>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-teal text-sm font-bold text-canvas">
+            M
           </span>
-        )}
+          {!collapsed && (
+            <span className="truncate text-sm font-semibold tracking-tight text-ink">
+              Maweb Solutions
+              <span className="ml-1.5 font-normal text-ink/40">· system</span>
+            </span>
+          )}
+        </div>
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="shrink-0 rounded-md p-1 text-ink/45 transition hover:bg-ink/[0.06] hover:text-ink"
@@ -139,7 +144,15 @@ export function Sidebar({
                           : "flex items-center gap-2.5 rounded-lg border-l-2 border-transparent px-2.5 py-2 text-sm font-medium text-ink/60 transition hover:bg-ink/[0.05] hover:text-ink"
                       }
                     >
-                      <Icon className="h-4 w-4 shrink-0" />
+                      <span
+                        className={
+                          active
+                            ? "flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent text-canvas"
+                            : "flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink/60"
+                        }
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                      </span>
                       {!collapsed && (
                         <span className="flex-1 truncate">{item.label}</span>
                       )}

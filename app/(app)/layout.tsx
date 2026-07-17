@@ -23,7 +23,7 @@ export default async function AppLayout({
   return (
     <div className="flex min-h-screen">
       <Sidebar notificationCount={notifications.length} />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
+      <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-8 sm:px-6 sm:py-10">
         {children}
       </main>
       <CommandPalette />

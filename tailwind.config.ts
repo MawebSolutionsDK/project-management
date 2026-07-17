@@ -17,6 +17,8 @@ const config: Config = {
         "rust-soft": "#33191A",
         gold: "#E8B75A",
         "gold-soft": "#332912",
+        teal: "#5FD4C4",
+        "teal-soft": "#122A28",
       },
       fontFamily: {
         sans: [

@@ -14,6 +14,7 @@ import { StatusBadge } from "@/components/status-badge";
 import {
   MrrGrowthChart,
   LeadsPerWeekChart,
+  Sparkline,
 } from "@/components/dashboard-charts";
 import { createClient } from "@/lib/supabase/server";
 import { daysUntil, relativeDayLabel } from "@/lib/dates";
@@ -85,73 +86,108 @@ export default async function DashboardPage() {
     0,
   );
 
+  const leadsSpark = leadsPerWeekData.map((d) => d.value);
+  const mrrSpark = mrrGrowthData.slice(-6).map((d) => d.value);
+
   const cards = [
     {
       href: "/kunder",
       label: "Kunder",
       value: customersRes.count ?? 0,
       icon: Users,
+      tone: "accent" as const,
       trend:
         summaries.week.newCustomers > 0
           ? `+${summaries.week.newCustomers} denne uge`
           : null,
+      spark: null as number[] | null,
     },
     {
       href: "/leads",
       label: "Åbne leads",
       value: leadsCountRes.count ?? 0,
       icon: Target,
+      tone: "teal" as const,
       trend:
         summaries.week.newLeads > 0
           ? `+${summaries.week.newLeads} denne uge`
           : null,
+      spark: leadsSpark.length >= 2 ? leadsSpark : null,
     },
     {
       href: "/projekter",
       label: "Aktive projekter",
       value: projectsCountRes.count ?? 0,
       icon: Briefcase,
+      tone: "gold" as const,
       trend:
         summaries.week.newProjects > 0
           ? `+${summaries.week.newProjects} denne uge`
           : null,
+      spark: null as number[] | null,
     },
     {
       href: "/vedligeholdelse",
       label: "MRR",
       value: `${mrr.toLocaleString("da-DK")} kr.`,
       icon: Wallet,
+      tone: "accent" as const,
       trend: null,
+      spark: mrrSpark.length >= 2 ? mrrSpark : null,
     },
     {
       href: "/support",
       label: "Åbne supportsager",
       value: openSupportRes.count ?? 0,
       icon: LifeBuoy,
+      tone: "rust" as const,
       trend: null,
+      spark: null as number[] | null,
     },
     {
       href: "/mails?filter=unread",
       label: "Ulæste kunde-mails",
       value: unreadMailRes.count ?? 0,
       icon: Mail,
+      tone: "teal" as const,
       trend: null,
+      spark: null as number[] | null,
     },
   ];
+
+  const TONE_CHIP: Record<string, string> = {
+    accent: "bg-accent-soft text-accent",
+    gold: "bg-gold-soft text-gold",
+    rust: "bg-rust-soft text-rust",
+    teal: "bg-teal-soft text-teal",
+  };
+  const TONE_SPARK: Record<string, string> = {
+    accent: "#7C93FF",
+    gold: "#E8B75A",
+    rust: "#F2685C",
+    teal: "#5FD4C4",
+  };
 
   const topNotifications = notifications.slice(0, 5);
 
   // ---- Seneste aktivitet ----
   const activity = activityEvents.slice(0, 8);
 
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 10 ? "God morgen" : hour < 18 ? "Goddag" : "God aften";
+
   return (
     <>
-      <h1 className="text-2xl font-semibold text-ink">
-        Velkommen, {user?.email}
-      </h1>
-      <p className="mt-1 text-sm text-ink/55">
-        Overblik over kunder, leads, projekter og drift.
-      </p>
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-accent-soft via-surface to-teal-soft p-6 sm:p-8">
+        <p className="text-sm font-medium text-accent">{greeting}</p>
+        <h1 className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">
+          Velkommen tilbage
+        </h1>
+        <p className="mt-1.5 text-sm text-ink/55">
+          Overblik over kunder, leads, projekter og drift — {user?.email}
+        </p>
+      </div>
 
       <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-ink/40">
         Nøgletal
@@ -163,15 +199,24 @@ export default async function DashboardPage() {
             <Link
               key={c.href}
               href={c.href}
-              className="card p-5 transition hover:border-accent/40"
+              className="card p-5 transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-lg"
             >
-              <Icon className="h-5 w-5 text-accent" />
+              <span
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${TONE_CHIP[c.tone]}`}
+              >
+                <Icon className="h-5 w-5" />
+              </span>
               <p className="mt-3 text-sm text-ink/55">{c.label}</p>
               <p className="mt-1 text-2xl font-semibold text-ink">{c.value}</p>
               {c.trend && (
                 <p className="mt-1.5 text-xs font-medium text-accent">
                   {c.trend}
                 </p>
+              )}
+              {c.spark && (
+                <div className="-mx-1 mt-1">
+                  <Sparkline data={c.spark} color={TONE_SPARK[c.tone]} />
+                </div>
               )}
             </Link>
           );

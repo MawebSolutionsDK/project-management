@@ -17,14 +17,18 @@ import { deleteLead, updateLeadStatus } from "./actions";
 
 const LEAD_COLUMNS: KanbanColumnDef[] = (
   Object.keys(leadStatusLabels) as (keyof typeof leadStatusLabels)[]
-).map((value) => ({ value, label: leadStatusLabels[value] }));
+).map((value) => ({
+  value,
+  label: leadStatusLabels[value],
+  tone: leadStatusTones[value],
+}));
 
 export default async function LeadsPage({
   searchParams,
 }: {
   searchParams: { view?: string };
 }) {
-  const view = searchParams.view === "board" ? "board" : "list";
+  const view = searchParams.view === "list" ? "list" : "board";
   const supabase = createClient();
   const { data: leads } = await supabase
     .from("leads")
@@ -49,6 +53,7 @@ export default async function LeadsPage({
       meta,
       metaTone,
       status: l.status,
+      tone: leadStatusTones[l.status as keyof typeof leadStatusTones],
     };
   });
 

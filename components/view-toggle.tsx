@@ -14,11 +14,11 @@ export function ViewToggle({
 
   return (
     <div className="flex gap-1 rounded-full border border-line p-1">
-      <Link href={base} className={pill(view === "list")}>
-        Liste
-      </Link>
-      <Link href={`${base}?view=board`} className={pill(view === "board")}>
+      <Link href={base} className={pill(view === "board")}>
         Board
+      </Link>
+      <Link href={`${base}?view=list`} className={pill(view === "list")}>
+        Liste
       </Link>
     </div>
   );

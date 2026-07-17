@@ -17,14 +17,18 @@ import { deleteProject, updateProjectStatus } from "./actions";
 
 const PROJECT_COLUMNS: KanbanColumnDef[] = (
   Object.keys(projectStatusLabels) as (keyof typeof projectStatusLabels)[]
-).map((value) => ({ value, label: projectStatusLabels[value] }));
+).map((value) => ({
+  value,
+  label: projectStatusLabels[value],
+  tone: projectStatusTones[value],
+}));
 
 export default async function ProjekterPage({
   searchParams,
 }: {
   searchParams: { view?: string };
 }) {
-  const view = searchParams.view === "board" ? "board" : "list";
+  const view = searchParams.view === "list" ? "list" : "board";
   const supabase = createClient();
   const { data: projects } = await supabase
     .from("projects")
@@ -51,6 +55,7 @@ export default async function ProjekterPage({
       meta,
       metaTone,
       status: p.status,
+      tone: projectStatusTones[p.status as keyof typeof projectStatusTones],
     };
   });
 

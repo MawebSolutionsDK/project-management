@@ -107,3 +107,32 @@ export function LeadsPerWeekChart({ data }: { data: ChartPoint[] }) {
     </ResponsiveContainer>
   );
 }
+
+// Lille indlejret trend-graf til nøgletal-kort - ingen akser/labels, kun formen af udviklingen.
+export function Sparkline({
+  data,
+  color = ACCENT,
+}: {
+  data: number[];
+  color?: string;
+}) {
+  if (data.length < 2) return null;
+  const points = data.map((value, i) => ({ i, value }));
+  return (
+    <ResponsiveContainer width="100%" height={36}>
+      <AreaChart
+        data={points}
+        margin={{ top: 2, right: 0, left: 0, bottom: 0 }}
+      >
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke={color}
+          strokeWidth={2}
+          fill={color}
+          fillOpacity={0.15}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}

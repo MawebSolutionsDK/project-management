@@ -2,12 +2,15 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { Inbox } from "lucide-react";
 import {
   DragDropContext,
   Droppable,
   Draggable,
   type DropResult,
 } from "@hello-pangea/dnd";
+import { Avatar } from "./avatar";
+import type { BadgeTone } from "@/lib/types";
 
 export type KanbanCard = {
   id: string;
@@ -16,9 +19,30 @@ export type KanbanCard = {
   meta?: string | null;
   metaTone?: "danger" | "warning" | null;
   status: string;
+  tone?: BadgeTone;
 };
 
-export type KanbanColumnDef = { value: string; label: string };
+export type KanbanColumnDef = {
+  value: string;
+  label: string;
+  tone?: BadgeTone;
+};
+
+const TONE_BORDER: Record<BadgeTone, string> = {
+  neutral: "border-l-ink/20",
+  info: "border-l-accent",
+  success: "border-l-teal",
+  warning: "border-l-gold",
+  danger: "border-l-rust",
+};
+
+const TONE_DOT: Record<BadgeTone, string> = {
+  neutral: "bg-ink/30",
+  info: "bg-accent",
+  success: "bg-teal",
+  warning: "bg-gold",
+  danger: "bg-rust",
+};
 
 // Generisk Kanban-board genbrugt af Leads/Projekter/Support. Data hentes server-side af
 // den kaldende side; onStatusChange er en "use server"-handling der sendes direkte ind
@@ -57,12 +81,15 @@ export function KanbanBoard({
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-4 overflow-x-auto pb-2">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
         {columns.map((col) => {
           const colCards = localCards.filter((c) => c.status === col.value);
           return (
-            <div key={col.value} className="w-72 shrink-0">
+            <div key={col.value} className="min-w-0">
               <div className="mb-3 flex items-center gap-2 px-1">
+                <span
+                  className={`h-2 w-2 rounded-full ${TONE_DOT[col.tone ?? "neutral"]}`}
+                />
                 <span className="text-sm font-semibold text-ink/80">
                   {col.label}
                 </span>
@@ -91,19 +118,22 @@ export function KanbanBoard({
                             ref={dragProvided.innerRef}
                             {...dragProvided.draggableProps}
                             {...dragProvided.dragHandleProps}
-                            className={`card block p-3.5 transition ${
+                            className={`card block border-l-4 p-3.5 transition ${TONE_BORDER[card.tone ?? "neutral"]} ${
                               dragSnapshot.isDragging
                                 ? "shadow-lg ring-1 ring-accent/40"
-                                : "hover:border-accent/40"
+                                : "hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md"
                             }`}
                           >
-                            <p className="text-sm font-medium text-ink">
+                            <p className="line-clamp-2 text-sm font-medium text-ink">
                               {card.title}
                             </p>
                             {card.subtitle && (
-                              <p className="mt-1 truncate text-xs text-ink/50">
-                                {card.subtitle}
-                              </p>
+                              <div className="mt-2 flex items-center gap-1.5">
+                                <Avatar name={card.subtitle} size="sm" />
+                                <p className="truncate text-xs text-ink/50">
+                                  {card.subtitle}
+                                </p>
+                              </div>
                             )}
                             {card.meta && (
                               <p
@@ -124,9 +154,10 @@ export function KanbanBoard({
                     ))}
                     {provided.placeholder}
                     {colCards.length === 0 && (
-                      <p className="px-2 py-3 text-center text-xs text-ink/30">
-                        Ingen her
-                      </p>
+                      <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-line px-2 py-6 text-center">
+                        <Inbox className="h-4 w-4 text-ink/20" />
+                        <p className="text-xs text-ink/30">Ingen her</p>
+                      </div>
                     )}
                   </div>
                 )}

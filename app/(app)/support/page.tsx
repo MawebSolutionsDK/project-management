@@ -28,7 +28,7 @@ export default async function SupportPage({
 }: {
   searchParams: { view?: string };
 }) {
-  const view = searchParams.view === "board" ? "board" : "list";
+  const view = searchParams.view === "list" ? "list" : "board";
   const supabase = createClient();
   const { data: cases } = await supabase
     .from("support_cases")
@@ -46,6 +46,7 @@ export default async function SupportPage({
         : null,
     metaTone: null,
     status: s.status,
+    tone: supportStatusTones[s.status as keyof typeof supportStatusTones],
   }));
 
   return (
