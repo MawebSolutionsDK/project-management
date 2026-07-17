@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, Download } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
@@ -21,10 +21,16 @@ export default async function KunderPage() {
             </h1>
             <p className="mt-1 text-sm text-ink/55">Alle kunder, inkl. interne projekter.</p>
           </div>
-          <Link href="/kunder/ny" className="btn-primary gap-1.5">
-            <Plus className="h-4 w-4" />
-            Ny kunde
-          </Link>
+          <div className="flex items-center gap-2">
+            <a href="/kunder/export" className="btn-secondary gap-1.5">
+              <Download className="h-4 w-4" />
+              Eksportér CSV
+            </a>
+            <Link href="/kunder/ny" className="btn-primary gap-1.5">
+              <Plus className="h-4 w-4" />
+              Ny kunde
+            </Link>
+          </div>
         </div>
         <div className="card overflow-hidden">
           <table className="w-full text-left text-sm">

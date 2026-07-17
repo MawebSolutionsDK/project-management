@@ -5,6 +5,7 @@ import { BackLink } from "@/components/back-link";
 import { Field } from "@/components/form-field";
 import { createClient } from "@/lib/supabase/server";
 import { updateExpense, deleteExpense } from "../actions";
+import { annualizedCost } from "@/lib/types";
 
 export default async function UdgiftDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -19,39 +20,24 @@ export default async function UdgiftDetailPage({ params }: { params: { id: strin
       <AppNav current="/udgifter" />
       <main className="mx-auto max-w-3xl px-6 py-10">
         <BackLink href="/udgifter" label="Tilbage til udgifter" />
-        <h1 className="mb-6 text-2xl font-semibold text-ink">{expense.name}</h1>
+        <h1 className="mb-1 text-2xl font-semibold text-ink">{expense.name}</h1>
+        <p className="mb-6 text-sm text-ink/55">Omregnet: {annualizedCost(expense).toLocaleString("da-DK")} kr./år</p>
         <form action={updateWithId} className="card space-y-4 p-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Navn" name="name" defaultValue={expense.name} required />
             <Field label="Kategori" name="category" defaultValue={expense.category ?? ""} />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field
-              label="Årlig pris (DKK)"
-              name="annual_cost"
-              type="number"
-              defaultValue={expense.annual_cost?.toString() ?? ""}
-              required
-            />
+            <Field label="Pris (DKK)" name="cost" type="number" defaultValue={expense.cost?.toString() ?? ""} required />
             <div>
-              <label className="label">Fornyelsesmåned</label>
-              <select name="renewal_month" defaultValue={expense.renewal_month?.toString() ?? ""} className="input">
-                <option value="">Ukendt</option>
-                <option value="1">Januar</option>
-                <option value="2">Februar</option>
-                <option value="3">Marts</option>
-                <option value="4">April</option>
-                <option value="5">Maj</option>
-                <option value="6">Juni</option>
-                <option value="7">Juli</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10">Oktober</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
+              <label className="label">Betalingshyppighed</label>
+              <select name="billing_frequency" defaultValue={expense.billing_frequency} className="input">
+                <option value="maanedlig">Månedligt</option>
+                <option value="aarlig">Årligt</option>
               </select>
             </div>
           </div>
+          <Field label="Næste fornyelsesdato" name="renewal_date" type="date" defaultValue={expense.renewal_date ?? ""} required />
           <div>
             <label className="label">Noter</label>
             <textarea name="notes" rows={3} defaultValue={expense.notes ?? ""} className="input" />

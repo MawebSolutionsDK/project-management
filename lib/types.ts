@@ -148,14 +148,26 @@ export interface SupportCase {
   created_at: string;
 }
 
+export type BillingFrequency = "maanedlig" | "aarlig";
+
 export interface BusinessExpense {
   id: string;
   name: string;
   category: string | null;
-  annual_cost: number;
-  renewal_month: number | null;
+  cost: number;
+  billing_frequency: BillingFrequency;
+  renewal_date: string | null;
   notes: string | null;
   created_at: string;
+}
+
+export const billingFrequencyLabels: Record<BillingFrequency, string> = {
+  maanedlig: "Månedligt",
+  aarlig: "Årligt",
+};
+
+export function annualizedCost(expense: { cost: number; billing_frequency: BillingFrequency }): number {
+  return expense.billing_frequency === "maanedlig" ? expense.cost * 12 : expense.cost;
 }
 
 export const agreementStatusLabels: Record<AgreementStatus, string> = {

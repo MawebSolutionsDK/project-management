@@ -2,14 +2,14 @@ import Link from "next/link";
 import { Plus, Receipt } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { createClient } from "@/lib/supabase/server";
-
-const MAANEDER = ["", "Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"];
+import { billingFrequencyLabels, annualizedCost } from "@/lib/types";
 
 export default async function UdgifterPage() {
   const supabase = createClient();
   const { data: expenses } = await supabase.from("business_expenses").select("*").order("name");
 
-  const total = (expenses ?? []).reduce((sum, e) => sum + Number(e.annual_cost || 0), 0);
+  const rows = expenses ?? [];
+  const total = rows.reduce((sum, e) => sum + annualizedCost(e), 0);
 
   return (
     <>
@@ -22,7 +22,7 @@ export default async function UdgifterPage() {
               Software- og plugin-udgifter
             </h1>
             <p className="mt-1 text-sm text-ink/55">
-              Samlet: {total.toLocaleString("da-DK")} kr./år — brug dette til at prissætte vedligeholdelsesaftaler korrekt.
+              Samlet: {total.toLocaleString("da-DK")} kr./år (omregnet) — brug dette til at prissætte vedligeholdelsesaftaler korrekt.
             </p>
           </div>
           <Link href="/udgifter/ny" className="btn-primary gap-1.5">
@@ -36,12 +36,13 @@ export default async function UdgifterPage() {
               <tr>
                 <th className="px-5 py-3">Navn</th>
                 <th className="px-5 py-3">Kategori</th>
-                <th className="px-5 py-3">Årlig pris</th>
+                <th className="px-5 py-3">Pris</th>
+                <th className="px-5 py-3">Omregnet årligt</th>
                 <th className="px-5 py-3">Fornyes</th>
               </tr>
             </thead>
             <tbody>
-              {(expenses ?? []).map((e) => (
+              {rows.map((e) => (
                 <tr key={e.id} className="border-t border-line/70 hover:bg-ink/[0.02]">
                   <td className="px-5 py-3">
                     <Link href={`/udgifter/${e.id}`} className="font-medium text-ink hover:underline">
@@ -49,13 +50,16 @@ export default async function UdgifterPage() {
                     </Link>
                   </td>
                   <td className="px-5 py-3 text-ink/65">{e.category ?? "–"}</td>
-                  <td className="px-5 py-3 text-ink/65">{Number(e.annual_cost).toLocaleString("da-DK")} kr.</td>
-                  <td className="px-5 py-3 text-ink/65">{e.renewal_month ? MAANEDER[e.renewal_month] : "–"}</td>
+                  <td className="px-5 py-3 text-ink/65">
+                    {Number(e.cost).toLocaleString("da-DK")} kr. / {billingFrequencyLabels[e.billing_frequency as keyof typeof billingFrequencyLabels].toLowerCase()}
+                  </td>
+                  <td className="px-5 py-3 text-ink/65">{annualizedCost(e).toLocaleString("da-DK")} kr.</td>
+                  <td className="px-5 py-3 text-ink/65">{e.renewal_date ?? "–"}</td>
                 </tr>
               ))}
-              {(expenses ?? []).length === 0 && (
+              {rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-8 text-center text-ink/40">
+                  <td colSpan={5} className="px-5 py-8 text-center text-ink/40">
                     Ingen udgifter registreret endnu.
                   </td>
                 </tr>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Briefcase } from "lucide-react";
+import { Plus, Briefcase, Download } from "lucide-react";
 import AppNav from "@/components/app-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { createClient } from "@/lib/supabase/server";
@@ -24,10 +24,16 @@ export default async function ProjekterPage() {
             </h1>
             <p className="mt-1 text-sm text-ink/55">Alle projekter, fra forespørgsel til afslutning.</p>
           </div>
-          <Link href="/projekter/ny" className="btn-primary gap-1.5">
-            <Plus className="h-4 w-4" />
-            Nyt projekt
-          </Link>
+          <div className="flex items-center gap-2">
+            <a href="/projekter/export" className="btn-secondary gap-1.5">
+              <Download className="h-4 w-4" />
+              Eksportér CSV
+            </a>
+            <Link href="/projekter/ny" className="btn-primary gap-1.5">
+              <Plus className="h-4 w-4" />
+              Nyt projekt
+            </Link>
+          </div>
         </div>
         <div className="card overflow-hidden">
           <table className="w-full text-left text-sm">

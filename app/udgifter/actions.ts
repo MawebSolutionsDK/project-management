@@ -5,12 +5,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 function fields(formData: FormData) {
-  const monthRaw = formData.get("renewal_month") as string;
   return {
     name: formData.get("name") as string,
     category: (formData.get("category") as string) || null,
-    annual_cost: Number(formData.get("annual_cost") || 0),
-    renewal_month: monthRaw ? Number(monthRaw) : null,
+    cost: Number(formData.get("cost") || 0),
+    billing_frequency: (formData.get("billing_frequency") as string) || "aarlig",
+    renewal_date: (formData.get("renewal_date") as string) || null,
     notes: (formData.get("notes") as string) || null,
   };
 }
